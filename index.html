@@ -1105,14 +1105,12 @@
     if (!p.playerId) p.playerId = makePlayerId();
 
     if (!p.name || !p.className){
-      let name = prompt("Skriv inn navnet ditt:");
-      name = (name ?? "").toString().trim();
+      let name = "";
       while (!name){
-        const again = prompt("Navn kan ikke være tomt. Skriv inn navnet ditt:");
-        name = (again ?? "").toString().trim();
-        if (!name && again === null) break;
+        const inp = prompt("Skriv inn navnet ditt:");
+        if (inp === null) continue; // kan ikke avbryte
+        name = inp.toString().trim();
       }
-      if (!name) name = "Ukjent";
 
       let className = prompt("Skriv inn klassen din (f.eks. 8B):");
       className = (className ?? "").toString().trim().toUpperCase();

@@ -879,10 +879,16 @@
   <div id="othersModal" class="modalOverlay" style="display:none;">
     <div class="modalCard" role="dialog" aria-modal="true" aria-label="Andres highscore">
       <div class="modalTop">
-        <h3>Andres highscores</h3>
-        <button id="closeOthersBtn" type="button" class="smallBtn">Lukk</button>
+        <div>
+          <h3 id="othersTitle">Andres highscores</h3>
+          <div id="othersSub" class="modalSub"></div>
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button id="othersToggleBtn" type="button" class="smallBtn">Se alle klassene</button>
+          <button id="closeOthersBtn" type="button" class="smallBtn">Lukk</button>
+        </div>
       </div>
-      <div class="modalSub">Topp 100 (klikk på en rad for oppsummering)</div>
       <div id="othersList" class="hiscoreList modalList"></div>
       <div id="othersEmpty" class="empty" style="display:none;">Ingen runder lagret ennå.</div>
     </div>
@@ -1126,27 +1132,27 @@
   }
 
   async function apiSubmitScore(profile, entry){
-  const payload = {
-    ...entry,
-    playerId: profile.playerId,
-    name: profile.name,
-    className: profile.className
-  };
+    // Ensure stored profile wins over any accidental fields in entry
+    const payload = {
+      ...entry,
+      playerId: profile.playerId,
+      name: profile.name,
+      className: profile.className
+    };
 
-  const res = await fetch("/.netlify/functions/submit-score", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+    const res = await fetch("/.netlify/functions/submit-score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-  if (!res.ok){
-    const txt = await res.text().catch(() => "");
-    throw new Error(`submit-score feilet (${res.status}): ${txt}`);
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`submit-score feilet (${res.status}): ${txt}`);
+    }
+
+    return res.json().catch(() => ({ ok: true }));
   }
-
-  return res.json().catch(() => ({ ok: true }));
-}
-
 
   async function apiGetMyScores(playerId){
     const url = `/.netlify/functions/get-my-scores?playerId=${encodeURIComponent(playerId)}`;
@@ -1159,12 +1165,23 @@
     return Array.isArray(data) ? data : [];
   }
 
-  async function apiGetTopScores(limit = 100){
-    const url = `/.netlify/functions/get-top-scores?limit=${encodeURIComponent(String(limit))}`;
+  async function apiGetClassTopScores(className){
+    const url = `/.netlify/functions/get-top-scores?className=${encodeURIComponent(String(className || ""))}`;
     const res = await fetch(url, { headers: { "Accept": "application/json" } });
     if (!res.ok){
       const txt = await res.text().catch(() => "");
-      throw new Error(`get-top-scores feilet (${res.status}): ${txt}`);
+      throw new Error(`get-top-scores (class) feilet (${res.status}): ${txt}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  }
+
+  async function apiGetGlobalTopScores(){
+    const url = `/.netlify/functions/get-top-scores`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`get-top-scores (global) feilet (${res.status}): ${txt}`);
     }
     const data = await res.json();
     return Array.isArray(data) ? data : [];
@@ -1223,6 +1240,9 @@
 
   const seeOthersBtn = document.getElementById("seeOthersBtn");
   const othersModal = document.getElementById("othersModal");
+  const othersTitleEl = document.getElementById("othersTitle");
+  const othersSubEl = document.getElementById("othersSub");
+  const othersToggleBtn = document.getElementById("othersToggleBtn");
   const closeOthersBtn = document.getElementById("closeOthersBtn");
   const othersListEl = document.getElementById("othersList");
   const othersEmptyEl = document.getElementById("othersEmpty");
@@ -1304,7 +1324,17 @@
     });
   }
 
+  // View state for modal: "class" or "global"
+  let othersView = "class";
+
+  function isRealClassName(x){
+    const s = String(x || "").trim();
+    if (!s) return false;
+    return s.toLowerCase() !== "ukjent";
+  }
+
   function openOthersModal(){
+    othersView = "class";
     othersModal.style.display = "flex";
     document.body.style.overflow = "hidden";
     loadOthersScores();
@@ -1313,6 +1343,11 @@
   function closeOthersModal(){
     othersModal.style.display = "none";
     document.body.style.overflow = "";
+  }
+
+  function toggleOthersView(){
+    othersView = (othersView === "class") ? "global" : "class";
+    loadOthersScores();
   }
 
   async function loadOthersScores(){
@@ -1324,9 +1359,37 @@
     loading.textContent = "Laster…";
     othersListEl.appendChild(loading);
 
+    const p = getStoredProfile();
+    const className = (p && p.className) ? String(p.className).trim() : "";
+    const hasClass = isRealClassName(className);
+
+    // If we can't know class yet, force global view
+    let view = othersView;
+    if (view === "class" && !hasClass) view = "global";
+
     try{
-      const list = (await apiGetTopScores(100)).map(normalizeEntry);
-      renderOthersScores(list);
+      let list = [];
+
+      if (view === "class"){
+        othersTitleEl.textContent = "Andres highscores";
+        othersSubEl.textContent = `Din klasse (${className}) • topp 5 • unike navn (klikk på en rad for oppsummering)`;
+        othersToggleBtn.style.display = "inline-flex";
+        othersToggleBtn.textContent = "Se alle klassene";
+        list = (await apiGetClassTopScores(className)).map(normalizeEntry);
+      } else {
+        othersTitleEl.textContent = "Andres highscores";
+        othersSubEl.textContent = "Alle klasser • topp 25 • unike navn (klikk på en rad for oppsummering)";
+        if (hasClass){
+          othersToggleBtn.style.display = "inline-flex";
+          othersToggleBtn.textContent = "Se min klasse";
+        } else {
+          othersToggleBtn.style.display = "none";
+        }
+        list = (await apiGetGlobalTopScores()).map(normalizeEntry);
+      }
+
+      othersView = view;
+      renderOthersScores(list, view);
     }catch(e){
       console.warn("Kunne ikke hente toppscore", e);
       othersListEl.innerHTML = "";
@@ -1335,7 +1398,7 @@
     }
   }
 
-  function renderOthersScores(list){
+  function renderOthersScores(list, view){
     othersListEl.innerHTML = "";
 
     if (!list || list.length === 0){
@@ -1346,7 +1409,7 @@
 
     othersEmptyEl.style.display = "none";
 
-    list.slice(0, 100).forEach((e, idx) => {
+    list.forEach((e, idx) => {
       const row = document.createElement("div");
       row.className = "row";
       row.title = "Klikk for oppsummering";
@@ -1374,7 +1437,9 @@
 
       const line2 = document.createElement("div");
       line2.className = "line2";
-      const who = [e.name, e.className].filter(Boolean).join(" • ") || "Ukjent";
+      const who = (view === "class")
+        ? (e.name || "Ukjent")
+        : ([e.name, e.className].filter(Boolean).join(" • ") || "Ukjent");
       line2.textContent = `${who} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
 
       meta.appendChild(line1);
@@ -1893,6 +1958,11 @@
   });
 
   closeOthersBtn.addEventListener("click", closeOthersModal);
+
+  othersToggleBtn.addEventListener("click", () => {
+    if (running) return;
+    toggleOthersView();
+  });
 
   othersModal.addEventListener("click", (e) => {
     if (e.target === othersModal) closeOthersModal();

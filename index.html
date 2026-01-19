@@ -328,6 +328,54 @@
       cursor:not-allowed;
     }
 
+    select{
+      width:min(260px, 100%);
+      padding:14px 14px;
+      font-size:20px;
+      border-radius:14px;
+      outline:none;
+      border:2px solid rgba(255,109,0,.35);
+      background: rgba(255,255,255,.92);
+      color: var(--text);
+      font-weight:950;
+      letter-spacing:.2px;
+      box-shadow: 0 14px 25px rgba(60,30,0,.10);
+      cursor:pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    select:focus{
+      border-color: rgba(255,109,0,.75);
+      box-shadow: 0 18px 28px rgba(255,109,0,.20);
+    }
+
+    .profileForm{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      align-items:center;
+      padding:20px 0;
+    }
+
+    .profileForm label{
+      font-size:14px;
+      font-weight:900;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    .profileForm .formGroup{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:center;
+      width:100%;
+    }
+
     .feedback{
       font-size:16px;
       font-weight:950;
@@ -894,6 +942,41 @@
     </div>
   </div>
 
+  <div id="profileModal" class="modalOverlay" style="display:none;">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-label="Registrer deg">
+      <div class="modalTop">
+        <h3>Registrer deg</h3>
+      </div>
+      <form id="profileForm" class="profileForm">
+        <div class="formGroup">
+          <label for="profileNameInput">Skriv inn navnet ditt:</label>
+          <input type="text" id="profileNameInput" placeholder="Navn" required maxlength="40" autocomplete="off" />
+        </div>
+        <div class="formGroup">
+          <label for="profileClassSelect">Velg klassen din:</label>
+          <select id="profileClassSelect" required>
+            <option value="" disabled selected>Velg klasse...</option>
+            <option value="8A">8A</option>
+            <option value="8B">8B</option>
+            <option value="8C">8C</option>
+            <option value="8D">8D</option>
+            <option value="9A">9A</option>
+            <option value="9B">9B</option>
+            <option value="9C">9C</option>
+            <option value="9D">9D</option>
+            <option value="9E">9E</option>
+            <option value="10A">10A</option>
+            <option value="10B">10B</option>
+            <option value="10C">10C</option>
+            <option value="10D">10D</option>
+            <option value="10E">10E</option>
+          </select>
+        </div>
+        <button type="submit">Lagre</button>
+      </form>
+    </div>
+  </div>
+
 
 <script>
 (() => {
@@ -1105,24 +1188,36 @@
     if (!p.playerId) p.playerId = makePlayerId();
 
     if (!p.name || !p.className){
-      let name = "";
-      while (!name){
-        const inp = prompt("Skriv inn navnet ditt:");
-        if (inp === null) continue; // kan ikke avbryte
-        name = inp.toString().trim();
-      }
+      const profileModal = document.getElementById("profileModal");
+      const profileForm = document.getElementById("profileForm");
+      const profileNameInput = document.getElementById("profileNameInput");
+      const profileClassSelect = document.getElementById("profileClassSelect");
 
-      let className = prompt("Skriv inn klassen din (f.eks. 8B):");
-      className = (className ?? "").toString().trim().toUpperCase();
-      while (!className){
-        const again = prompt("Klasse kan ikke være tom. Skriv inn klassen din:");
-        className = (again ?? "").toString().trim().toUpperCase();
-        if (!className && again === null) break;
-      }
-      if (!className) className = "Ukjent";
+      // Reset form
+      profileNameInput.value = p.name || "";
+      profileClassSelect.value = p.className || "";
 
-      p.name = name.slice(0, 40);
-      p.className = className.slice(0, 40);
+      // Show modal
+      profileModal.style.display = "flex";
+      profileNameInput.focus();
+
+      // Wait for form submission
+      const result = await new Promise((resolve) => {
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          const name = profileNameInput.value.trim();
+          const className = profileClassSelect.value;
+          if (name && className) {
+            profileForm.removeEventListener("submit", handleSubmit);
+            profileModal.style.display = "none";
+            resolve({ name, className });
+          }
+        };
+        profileForm.addEventListener("submit", handleSubmit);
+      });
+
+      p.name = result.name.slice(0, 40);
+      p.className = result.className.slice(0, 40);
       saveProfile(p);
     }
 

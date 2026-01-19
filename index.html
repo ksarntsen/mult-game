@@ -1115,10 +1115,10 @@
       if (!name) name = "Ukjent";
 
       let className = prompt("Skriv inn klassen din (f.eks. 8B):");
-      className = (className ?? "").toString().trim();
+      className = (className ?? "").toString().trim().toUpperCase();
       while (!className){
         const again = prompt("Klasse kan ikke være tom. Skriv inn klassen din:");
-        className = (again ?? "").toString().trim();
+        className = (again ?? "").toString().trim().toUpperCase();
         if (!className && again === null) break;
       }
       if (!className) className = "Ukjent";

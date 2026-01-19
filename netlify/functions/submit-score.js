@@ -1,4 +1,4 @@
-import { ensureSchema, sql, jsonResponse, badRequest, methodNotAllowed } from "./_db.js";
+import { ensureSchema, sqlQuery, jsonResponse, badRequest, methodNotAllowed } from "./_db.js";
 
 function clampInt(n, min, max) {
   const x = Number(n);
@@ -56,7 +56,7 @@ export default async (req) => {
   const mistakesJson = JSON.stringify(mistakes);
   const slowestJson = JSON.stringify(slowestCorrect);
 
-  await sql(
+  await sqlQuery(
     `
       INSERT INTO scores (
         player_id, name, class_name,

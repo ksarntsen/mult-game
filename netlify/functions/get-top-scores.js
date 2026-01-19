@@ -1,4 +1,4 @@
-import { ensureSchema, sql, jsonResponse, methodNotAllowed } from "./_db.js";
+import { ensureSchema, sqlQuery, jsonResponse, methodNotAllowed } from "./_db.js";
 
 // Behavior:
 // - With className: top 5 scores for that class, one per unique name (best score)
@@ -38,7 +38,7 @@ export default async (req) => {
   // Pick best row per unique name first, then rank.
   // DISTINCT ON needs ORDER BY: (key, score desc...)
   const rows = isClass
-    ? await sql(
+    ? await sqlQuery(
         `
           WITH best AS (
             SELECT DISTINCT ON (LOWER(name))
@@ -71,7 +71,7 @@ export default async (req) => {
         `,
         [className]
       )
-    : await sql(
+    : await sqlQuery(
         `
           WITH best AS (
             SELECT DISTINCT ON (LOWER(name))

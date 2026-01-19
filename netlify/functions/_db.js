@@ -1,7 +1,15 @@
 import { neon } from "@netlify/neon";
 
 // Uses process.env.NETLIFY_DATABASE_URL automatically in Netlify DB projects.
-export const sql = neon();
+// The neon() function returns a tagged template function.
+// For parameterized queries, use sqlQuery(query, params).
+const sql = neon();
+export { sql };
+
+// Wrapper for parameterized queries using sql.query()
+export async function sqlQuery(query, params = []) {
+  return sql.query(query, params);
+}
 
 let ready = false;
 
@@ -9,7 +17,7 @@ export async function ensureSchema() {
   if (ready) return;
 
   // Core table
-  await sql(`
+  await sql`
     CREATE TABLE IF NOT EXISTS scores (
       id SERIAL PRIMARY KEY,
       player_id TEXT NOT NULL,
@@ -28,11 +36,11 @@ export async function ensureSchema() {
       slowest_correct JSONB NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
-  `);
+  `;
 
   // Useful indexes
-  await sql(`CREATE INDEX IF NOT EXISTS scores_player_id_idx ON scores (player_id);`);
-  await sql(`CREATE INDEX IF NOT EXISTS scores_points_idx ON scores (points DESC);`);
+  await sql`CREATE INDEX IF NOT EXISTS scores_player_id_idx ON scores (player_id);`;
+  await sql`CREATE INDEX IF NOT EXISTS scores_points_idx ON scores (points DESC);`;
 
   ready = true;
 }

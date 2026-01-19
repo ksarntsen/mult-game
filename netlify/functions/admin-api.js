@@ -1,4 +1,4 @@
-import { ensureSchema, sql, jsonResponse, badRequest, methodNotAllowed } from "./_db.js";
+import { ensureSchema, sqlQuery, jsonResponse, badRequest, methodNotAllowed } from "./_db.js";
 
 function unauthorized() {
   return new Response("Unauthorized", { status: 401 });
@@ -50,7 +50,7 @@ export default async (req) => {
 
     const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
-    const rows = await sql(
+    const rows = await sqlQuery(
       `
         SELECT
           id,
@@ -116,7 +116,7 @@ export default async (req) => {
     const id = Number(body.id);
     if (!Number.isFinite(id) || id <= 0) return badRequest("Missing/invalid id");
 
-    const rows = await sql(`DELETE FROM scores WHERE id = $1 RETURNING id;`, [id]);
+    const rows = await sqlQuery(`DELETE FROM scores WHERE id = $1 RETURNING id;`, [id]);
     return jsonResponse({ ok: true, deleted: rows.length });
   }
 
@@ -124,8 +124,8 @@ export default async (req) => {
     const playerId = String(body.playerId || "").trim();
     if (!playerId) return badRequest("Missing playerId");
 
-    const before = await sql(`SELECT COUNT(*)::int AS c FROM scores WHERE player_id = $1;`, [playerId]);
-    await sql(`DELETE FROM scores WHERE player_id = $1;`, [playerId]);
+    const before = await sqlQuery(`SELECT COUNT(*)::int AS c FROM scores WHERE player_id = $1;`, [playerId]);
+    await sqlQuery(`DELETE FROM scores WHERE player_id = $1;`, [playerId]);
 
     return jsonResponse({ ok: true, deleted: Number(before?.[0]?.c || 0) });
   }
@@ -134,11 +134,11 @@ export default async (req) => {
     const className = String(body.className || "").trim();
     if (!className) return badRequest("Missing className");
 
-    const before = await sql(
+    const before = await sqlQuery(
       `SELECT COUNT(*)::int AS c FROM scores WHERE UPPER(class_name) = UPPER($1);`,
       [className]
     );
-    await sql(`DELETE FROM scores WHERE UPPER(class_name) = UPPER($1);`, [className]);
+    await sqlQuery(`DELETE FROM scores WHERE UPPER(class_name) = UPPER($1);`, [className]);
 
     return jsonResponse({ ok: true, deleted: Number(before?.[0]?.c || 0) });
   }

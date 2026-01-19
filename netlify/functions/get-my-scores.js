@@ -1,4 +1,4 @@
-import { ensureSchema, sql, jsonResponse, badRequest, methodNotAllowed } from "./_db.js";
+import { ensureSchema, sqlQuery, jsonResponse, badRequest, methodNotAllowed } from "./_db.js";
 
 export default async (req) => {
   if (req.method !== "GET") return methodNotAllowed();
@@ -9,7 +9,7 @@ export default async (req) => {
   const playerId = (url.searchParams.get("playerId") || "").trim();
   if (!playerId) return badRequest("Missing playerId");
 
-  const rows = await sql(
+  const rows = await sqlQuery(
     `
       SELECT
         player_id,

@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin – Highscore DB</title>
+  <style>
+    :root{
+      --bg1:#ffb703;
+      --bg2:#fb8500;
+      --card:#fff7db;
+      --text:#2a1b00;
+      --muted:#6a4a00;
+      --border:rgba(42,27,0,.18);
+      --shadow:0 18px 50px rgba(60,30,0,.22);
+      --radius:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --danger:#d62828;
+      --ok:#1f8f3a;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:start center;
+      padding:28px 14px;
+      font-family:var(--font);
+      color:var(--text);
+      background: radial-gradient(circle at 20% 10%, var(--bg1), var(--bg2) 70%);
+    }
+
+    .wrap{
+      width:min(1100px, 100%);
+      display:grid;
+      gap:14px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+
+    h1{ margin:0 0 10px 0; font-size:20px; }
+    .row{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
+    }
+
+    label{
+      display:grid;
+      gap:6px;
+      font-size:12px;
+      color:var(--muted);
+      min-width: 160px;
+    }
+
+    input{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:14px;
+      outline:none;
+    }
+
+    button{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(60,30,0,.14);
+    }
+    button.danger{
+      border-color: rgba(214,40,40,.35);
+      color: var(--danger);
+    }
+    button.ok{
+      border-color: rgba(31,143,58,.35);
+      color: var(--ok);
+    }
+
+    .small{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:8px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    th, td{
+      padding:10px 8px;
+      border-bottom:1px solid rgba(42,27,0,.12);
+      font-size:13px;
+      vertical-align:top;
+    }
+    th{
+      text-align:left;
+      background:rgba(255,183,3,.35);
+      font-size:12px;
+      color:var(--muted);
+    }
+    tr:last-child td{ border-bottom:none; }
+
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:180px;
+    }
+
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
+    .muted{ color:var(--muted); }
+    .pill{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:12px;
+      margin-right:6px;
+    }
+
+    .status{
+      white-space:pre-wrap;
+      font-size:12px;
+      color:var(--muted);
+      margin-top:10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Admin – DB-rydding</h1>
+
+      <div class="row">
+        <label>
+          Admin-token
+          <input id="token" type="password" placeholder="ADMIN_TOKEN" />
+        </label>
+
+        <label>
+          Klassefilter
+          <input id="className" type="text" placeholder="f.eks 10A" />
+        </label>
+
+        <label>
+          PlayerId-filter
+          <input id="playerId" type="text" placeholder="UUID" />
+        </label>
+
+        <label>
+          Navnefilter
+          <input id="name" type="text" placeholder="del av navn" />
+        </label>
+
+        <label>
+          Limit
+          <input id="limit" type="number" min="1" max="1000" value="200" />
+        </label>
+
+        <button class="ok" id="btnLoad">Hent scores</button>
+        <button class="danger" id="btnDeleteClass">Slett hele klassen</button>
+      </div>
+
+      <div class="small">
+        Sletting krever korrekt token. Liste og sletting går via <span class="mono">/.netlify/functions/admin-api</span>.
+      </div>
+
+      <div id="status" class="status"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div>
+          <span class="pill" id="countPill">0 treff</span>
+          <span class="pill muted">Nyeste først</span>
+        </div>
+        <button class="danger" id="btnDeleteUser" disabled>Slett alle for valgt spiller</button>
+      </div>
+
+      <div style="margin-top:10px; overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tid</th>
+              <th>Navn</th>
+              <th>Klasse</th>
+              <th>Poeng</th>
+              <th>Acc</th>
+              <th>Streak</th>
+              <th>Max</th>
+              <th>PlayerId</th>
+              <th>Handling</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const tokenEl = $("token");
+  const classEl = $("className");
+  const playerEl = $("playerId");
+  const nameEl = $("name");
+  const limitEl = $("limit");
+  const statusEl = $("status");
+  const tbody = $("tbody");
+  const countPill = $("countPill");
+
+  const btnLoad = $("btnLoad");
+  const btnDeleteClass = $("btnDeleteClass");
+  const btnDeleteUser = $("btnDeleteUser");
+
+  let lastRows = [];
+  let selectedPlayerId = "";
+
+  // Remember token for this browser session
+  tokenEl.value = sessionStorage.getItem("adminToken") || "";
+  tokenEl.addEventListener("input", () => {
+    sessionStorage.setItem("adminToken", tokenEl.value || "");
+  });
+
+  function setStatus(msg){
+    statusEl.textContent = msg || "";
+  }
+
+  function headers(){
+    return {
+      "Content-Type": "application/json",
+      "x-admin-token": (tokenEl.value || "").trim()
+    };
+  }
+
+  async function apiList(){
+    const q = new URLSearchParams();
+    const className = (classEl.value || "").trim();
+    const playerId = (playerEl.value || "").trim();
+    const name = (nameEl.value || "").trim();
+    const limit = (limitEl.value || "200").toString().trim();
+
+    if (className) q.set("className", className);
+    if (playerId) q.set("playerId", playerId);
+    if (name) q.set("name", name);
+    q.set("limit", limit);
+
+    const res = await fetch("/.netlify/functions/admin-api?" + q.toString(), {
+      method: "GET",
+      headers: { "x-admin-token": (tokenEl.value || "").trim() }
+    });
+
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(res.status + " " + txt);
+    }
+    return res.json();
+  }
+
+  async function apiAction(payload){
+    const res = await fetch("/.netlify/functions/admin-api", {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(res.status + " " + txt);
+    }
+    return res.json();
+  }
+
+  function fmtTime(ts){
+    try {
+      const d = new Date(Number(ts));
+      return d.toLocaleString("no-NO");
+    } catch { return ""; }
+  }
+
+  function render(rows){
+    lastRows = rows || [];
+    tbody.innerHTML = "";
+    countPill.textContent = `${lastRows.length} treff`;
+    selectedPlayerId = (playerEl.value || "").trim();
+    btnDeleteUser.disabled = !selectedPlayerId;
+
+    for (const r of lastRows){
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td class="mono">${r.id}</td>
+        <td>${fmtTime(r.ts)}</td>
+        <td><b>${escapeHtml(r.name)}</b></td>
+        <td>${escapeHtml(r.className)}</td>
+        <td><b>${r.points}</b></td>
+        <td>${r.accuracy}%</td>
+        <td>${r.bestStreak}</td>
+        <td>${r.maxFactor}</td>
+        <td class="mono">${escapeHtml(r.playerId)}</td>
+        <td>
+          <div class="actions">
+            <button class="danger" data-del="${r.id}">Slett score</button>
+            <button data-sel="${escapeAttr(r.playerId)}">Velg spiller</button>
+            <button data-cls="${escapeAttr(r.className)}">Velg klasse</button>
+          </div>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  tbody.addEventListener("click", async (e) => {
+    const t = e.target;
+    if (!(t instanceof HTMLElement)) return;
+
+    const delId = t.getAttribute("data-del");
+    const selPid = t.getAttribute("data-sel");
+    const selCls = t.getAttribute("data-cls");
+
+    try {
+      if (delId){
+        const id = Number(delId);
+        if (!Number.isFinite(id)) return;
+        if (!confirm("Slette denne scoren (ID " + id + ")?")) return;
+
+        setStatus("Sletter score…");
+        const out = await apiAction({ action:"deleteScore", id });
+        setStatus("Slettet: " + out.deleted);
+        await load();
+        return;
+      }
+
+      if (selPid){
+        playerEl.value = selPid;
+        selectedPlayerId = selPid;
+        btnDeleteUser.disabled = false;
+        setStatus("Valgt spiller: " + selPid);
+        return;
+      }
+
+      if (selCls){
+        classEl.value = selCls;
+        setStatus("Valgt klasse: " + selCls);
+        return;
+      }
+    } catch (err){
+      setStatus("Feil: " + (err?.message || err));
+    }
+  });
+
+  async function load(){
+    setStatus("Henter…");
+    const rows = await apiList();
+    render(rows);
+    setStatus("OK");
+  }
+
+  btnLoad.addEventListener("click", async () => {
+    try { await load(); }
+    catch (err){ setStatus("Feil: " + (err?.message || err)); }
+  });
+
+  btnDeleteUser.addEventListener("click", async () => {
+    try{
+      const pid = (playerEl.value || "").trim();
+      if (!pid) return;
+      if (!confirm("Slette ALLE scores for denne spilleren?\n" + pid)) return;
+
+      setStatus("Sletter alle for spiller…");
+      const out = await apiAction({ action:"deleteUser", playerId: pid });
+      setStatus("Slettet: " + out.deleted);
+      await load();
+    } catch (err){
+      setStatus("Feil: " + (err?.message || err));
+    }
+  });
+
+  btnDeleteClass.addEventListener("click", async () => {
+    try{
+      const cls = (classEl.value || "").trim();
+      if (!cls) {
+        setStatus("Skriv inn klasse først.");
+        return;
+      }
+      if (!confirm("Slette ALLE scores i klassen?\n" + cls)) return;
+
+      setStatus("Sletter hele klassen…");
+      const out = await apiAction({ action:"deleteClass", className: cls });
+      setStatus("Slettet: " + out.deleted);
+      await load();
+    } catch (err){
+      setStatus("Feil: " + (err?.message || err));
+    }
+  });
+</script>
+</body>
+</html>

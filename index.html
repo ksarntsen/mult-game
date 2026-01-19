@@ -1,0 +1,1923 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>1-minutts gangetrening</title>
+  <style>
+    :root{
+      --bg1:#ffb703;
+      --bg2:#fb8500;
+      --card:#fff7db;
+      --text:#2a1b00;
+      --muted:#6a4a00;
+      --good:#1f8f3a;
+      --bad:#d62828;
+      --border:rgba(42,27,0,.18);
+      --shadow:0 18px 50px rgba(60,30,0,.22);
+      --radius:18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1100px 700px at 15% 15%, rgba(255,214,10,.85), transparent 60%),
+        radial-gradient(1000px 650px at 85% 35%, rgba(251,133,0,.85), transparent 58%),
+        radial-gradient(900px 600px at 55% 95%, rgba(255,183,3,.92), transparent 62%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    .wrap{ width:min(980px, 92vw); padding:24px; }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,247,219,.92));
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding:22px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-60px -60px auto auto;
+      width:220px;
+      height:220px;
+      border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,109,0,.35), rgba(255,109,0,0) 70%);
+      pointer-events:none;
+    }
+
+    .top{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:14px;
+    }
+
+    h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+      font-weight:900;
+    }
+
+    .stats{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(42,27,0,.18);
+      background: rgba(255,255,255,.75);
+      color:var(--muted);
+      font-size:14px;
+      min-width:140px;
+      justify-content:center;
+      box-shadow: 0 10px 20px rgba(60,30,0,.08);
+    }
+
+    .pill strong{
+      color:var(--text);
+      font-weight:950;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pill.lives{ min-width:170px; gap:10px; }
+
+    .hearts{ display:flex; gap:4px; align-items:center; justify-content:center; }
+
+    .heart{
+      font-size:16px;
+      line-height:1;
+      opacity:.95;
+      filter: drop-shadow(0 6px 10px rgba(60,30,0,.18));
+      transition: transform .08s ease, opacity .12s ease;
+      user-select:none;
+    }
+
+    .heart.off{
+      opacity:.20;
+      transform: scale(.92);
+      filter:none;
+    }
+
+    .tiny{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size:12px;
+      padding:3px 7px;
+      border-radius:8px;
+      border:1px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.9);
+      color: var(--text);
+      font-weight:900;
+    }
+
+    /* TIME LOADER */
+    .bar{
+      height:10px;
+      width:100%;
+      border-radius:999px;
+      border:1px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.75);
+      overflow:hidden;
+      box-shadow: 0 12px 22px rgba(60,30,0,.08);
+    }
+    .bar > div{
+      height:100%;
+      width:100%;
+      transform-origin:left;
+      background: linear-gradient(90deg, rgba(255,214,10,.95), rgba(255,109,0,.95));
+      transform: scaleX(1);
+      transition: transform .12s linear;
+    }
+
+    /* COMBO LOADER */
+    .comboLoader{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+    }
+
+    .comboRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-size:12px;
+      font-weight:950;
+      color:var(--muted);
+      letter-spacing:.2px;
+    }
+
+    .comboRow strong{
+      color:var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .comboBar{
+      height:14px;
+      width:100%;
+      border-radius:999px;
+      border:1px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.75);
+      overflow:hidden;
+      box-shadow: 0 12px 22px rgba(60,30,0,.08);
+      position:relative;
+    }
+
+    .comboBase,
+    .comboFill{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      transform-origin:left;
+    }
+
+    .comboBase{
+      transform: scaleX(1);
+      transition: background .15s ease, filter .15s ease;
+      background: rgba(255,255,255,.75);
+    }
+
+    .comboFill{
+      transform: scaleX(0);
+      transition: transform .18s ease, filter .18s ease, background .15s ease;
+      background: linear-gradient(90deg, rgba(90,169,255,.95), rgba(0,136,255,.95));
+    }
+
+    .stage1{
+      background: linear-gradient(90deg, rgba(90,169,255,.95), rgba(0,136,255,.95));
+    }
+    .stage2{
+      background: linear-gradient(90deg, rgba(37,192,109,.95), rgba(15,150,75,.95));
+    }
+    .stage3{
+      background: linear-gradient(90deg, rgba(255,214,10,.98), rgba(255,109,0,.95));
+    }
+
+    /* MAX build-up = solid glowing white */
+    .maxBuild{
+      background: rgba(255,255,255,.98);
+      filter:
+        drop-shadow(0 0 10px rgba(255,255,255,.95))
+        drop-shadow(0 0 22px rgba(255,255,255,.55));
+    }
+
+    /* MAX = rainbow takeover + glow */
+    .max{
+      background: linear-gradient(90deg,
+        #ff004c, #ff7a00, #ffe600, #00d26a, #00b3ff, #7b2cff, #ff004c
+      );
+      background-size: 220% 100%;
+      animation: rainbowMove 1.2s linear infinite;
+      filter:
+        drop-shadow(0 0 10px rgba(255,255,255,.65))
+        drop-shadow(0 0 24px rgba(0,179,255,.35))
+        drop-shadow(0 0 28px rgba(255,0,76,.22));
+    }
+
+    @keyframes rainbowMove{
+      from{ background-position: 0% 50%; }
+      to{ background-position: 100% 50%; }
+    }
+
+    /* LAYOUT */
+    .content{
+      display:grid;
+      grid-template-columns: 1.25fr .95fr;
+      gap:18px;
+      margin-top:16px;
+    }
+
+    @media (max-width: 820px){
+      .content{ grid-template-columns:1fr; }
+      .pill{ min-width: 120px; }
+      .pill.lives{ min-width: 150px; }
+    }
+
+    .panel{
+      border:1px solid rgba(42,27,0,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,247,219,.75));
+      border-radius: var(--radius);
+      padding:18px;
+      box-shadow: 0 16px 30px rgba(60,30,0,.10);
+    }
+
+    .problem{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:center;
+      min-height:240px;
+    }
+
+    .big{
+      font-size:58px;
+      line-height:1;
+      font-weight:1000;
+      letter-spacing:.5px;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 10px 18px rgba(60,30,0,.10);
+    }
+
+    .sub{
+      color:var(--muted);
+      font-size:14px;
+      margin-top:-6px;
+      font-weight:700;
+    }
+
+    .answerRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      width:100%;
+      flex-wrap:wrap;
+      margin-top:4px;
+    }
+
+    input[type="text"]{
+      width:min(260px, 100%);
+      padding:14px 14px;
+      font-size:20px;
+      border-radius:14px;
+      outline:none;
+      border:2px solid rgba(255,109,0,.35);
+      background: rgba(255,255,255,.92);
+      color: var(--text);
+      font-weight:950;
+      letter-spacing:.2px;
+      box-shadow: 0 14px 25px rgba(60,30,0,.10);
+    }
+
+    input[type="text"]:focus{
+      border-color: rgba(255,109,0,.75);
+      box-shadow: 0 18px 28px rgba(255,109,0,.20);
+    }
+
+    input[type="text"]:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .feedback{
+      font-size:16px;
+      font-weight:950;
+      min-height:24px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .feedback .tag{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.8);
+      font-size:13px;
+      color:var(--muted);
+      font-weight:900;
+    }
+
+    .feedback.good{ color: var(--good); }
+    .feedback.bad{ color: var(--bad); }
+
+    .bigCorrect{
+      display:none;
+      margin-top:2px;
+      padding:12px 14px;
+      border-radius:16px;
+      border:2px solid rgba(214,40,40,.50);
+      background: rgba(214,40,40,.10);
+      color: var(--text);
+      font-weight:1000;
+      font-size:44px;
+      line-height:1;
+      letter-spacing:.2px;
+      font-variant-numeric: tabular-nums;
+      box-shadow: 0 16px 30px rgba(214,40,40,.12);
+    }
+    .bigCorrect.show{
+      display:inline-block;
+      animation: pop .12s ease-out;
+    }
+
+    @keyframes pop{
+      from{ transform: scale(.96); opacity:.0; }
+      to{ transform: scale(1); opacity:1; }
+    }
+
+    /* Difficulty selector */
+    .diffWrap{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-bottom:8px;
+    }
+
+    .seg{
+      display:flex;
+      gap:8px;
+      width:100%;
+    }
+
+    button{
+      border:2px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.85);
+      color: var(--text);
+      border-radius:14px;
+      padding:14px 14px;
+      font-size:16px;
+      font-weight:1000;
+      cursor:pointer;
+      transition: transform .05s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      width:100%;
+      box-shadow: 0 16px 26px rgba(60,30,0,.10);
+    }
+
+    button:hover{
+      background: rgba(255,255,255,.95);
+      border-color: rgba(255,109,0,.45);
+      box-shadow: 0 18px 28px rgba(255,109,0,.18);
+    }
+
+    button:active{ transform: translateY(1px); }
+
+    .seg button{
+      padding:10px 10px;
+      font-size:14px;
+      font-weight:950;
+      border-radius:999px;
+      box-shadow: 0 12px 22px rgba(60,30,0,.10);
+    }
+
+    .seg button.active{
+      background: linear-gradient(180deg, rgba(255,214,10,1), rgba(255,109,0,.92));
+      border-color: rgba(255,109,0,.75);
+    }
+
+    button.primary{
+      background: linear-gradient(180deg, rgba(255,214,10,.95), rgba(255,109,0,.85));
+      border-color: rgba(255,109,0,.55);
+      color:#2a1b00;
+    }
+
+    button.primary:hover{
+      background: linear-gradient(180deg, rgba(255,214,10,1), rgba(255,109,0,.92));
+      border-color: rgba(255,109,0,.70);
+      box-shadow: 0 20px 32px rgba(255,109,0,.24);
+    }
+
+    button.danger{
+      background: linear-gradient(180deg, rgba(214,40,40,.18), rgba(214,40,40,.10));
+      border-color: rgba(214,40,40,.35);
+    }
+
+    button:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .controls{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height:240px;
+      justify-content:flex-start;
+    }
+
+    .divider{
+      height:1px;
+      background: rgba(42,27,0,.16);
+      margin:6px 0;
+    }
+
+    /* FINISH SUMMARY (left panel) */
+    .finishCard{
+      display:none;
+      width:100%;
+      margin-top:10px;
+      padding:16px;
+      border-radius:18px;
+      border:1px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 18px 32px rgba(60,30,0,.10);
+    }
+    .finishCard.show{ display:block; animation: pop .12s ease-out; }
+
+    .finishTitle{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+    .finishTitle h2{
+      margin:0;
+      font-size:22px;
+      font-weight:1100;
+      letter-spacing:.2px;
+    }
+    .finishTitle .reason{
+      color:var(--muted);
+      font-weight:950;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .finishScore{
+      font-size:52px;
+      font-weight:1200;
+      line-height:1;
+      margin:6px 0 10px 0;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 10px 18px rgba(60,30,0,.10);
+    }
+
+    .finishMeta{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:6px;
+    }
+    @media (max-width: 520px){
+      .finishMeta{ grid-template-columns:1fr; }
+    }
+
+    .metaTile{
+      padding:12px;
+      border-radius:16px;
+      border:1px solid rgba(42,27,0,.14);
+      background: rgba(255,247,219,.55);
+    }
+    .metaTile .k{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:1000;
+      letter-spacing:.2px;
+      text-transform:uppercase;
+    }
+    .metaTile .v{
+      margin-top:4px;
+      font-size:22px;
+      font-weight:1200;
+      color:var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .metaTile .s{
+      margin-top:2px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+    }
+
+    .boxBig{
+      margin-top:10px;
+      padding:14px;
+      border-radius:18px;
+      border:1px solid rgba(42,27,0,.14);
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 14px 24px rgba(60,30,0,.06);
+    }
+    .boxBig h3{
+      margin:0 0 10px 0;
+      font-size:13px;
+      font-weight:1100;
+      color:var(--muted);
+      letter-spacing:.2px;
+      text-transform:uppercase;
+    }
+    .boxBigEmpty{
+      font-size:14px;
+      color:var(--muted);
+      font-weight:950;
+    }
+    .boxBigList{
+      margin:0;
+      padding-left:18px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height:200px;
+      overflow:auto;
+    }
+    .boxBigList li{
+      font-size:15px;
+      color:var(--text);
+      font-weight:1000;
+      line-height:1.25;
+    }
+    .boxBigList .muted{
+      color:var(--muted);
+      font-weight:900;
+    }
+
+    /* High score list */
+    .hiscore{
+      margin-top:6px;
+      padding:14px;
+      border-radius: var(--radius);
+      border:1px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 18px 32px rgba(60,30,0,.08);
+    }
+
+    .hiscoreTop{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+
+    .hiscore h3{
+      margin:0;
+      font-size:14px;
+      font-weight:1100;
+      letter-spacing:.2px;
+    }
+
+    .hiscore small{
+      color:var(--muted);
+      font-weight:900;
+      font-size:12px;
+    }
+
+    .hiscoreList{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height:260px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+
+    /* Modal (andres highscores) */
+    .modalOverlay{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.45);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:999;
+    }
+
+    .modalCard{
+      width: min(760px, 92vw);
+      max-height: min(82vh, 760px);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,247,219,.98));
+      border:1px solid rgba(42,27,0,.18);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+      overflow:hidden;
+    }
+
+    .modalTop{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .modalTop h3{
+      margin:0;
+      font-size:14px;
+      font-weight:1100;
+      letter-spacing:.2px;
+    }
+
+    .smallBtn{
+      width:auto;
+      padding:10px 12px;
+      font-size:13px;
+      border-radius:999px;
+      box-shadow: 0 12px 22px rgba(60,30,0,.10);
+    }
+
+    .modalSub{
+      color:var(--muted);
+      font-weight:900;
+      font-size:12px;
+      margin-top:-4px;
+    }
+
+    .modalList{
+      max-height:unset;
+      flex:1;
+      min-height:0;
+      overflow:auto;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 26px 1fr auto;
+      gap:10px;
+      align-items:center;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid rgba(42,27,0,.12);
+      background: rgba(255,247,219,.62);
+      cursor:pointer;
+      transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .row:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,109,0,.35);
+      box-shadow: 0 16px 26px rgba(60,30,0,.10);
+      background: rgba(255,247,219,.78);
+    }
+    .row:active{ transform: translateY(0px); }
+
+    .row .rank{
+      font-weight:1100;
+      color:var(--muted);
+      font-variant-numeric: tabular-nums;
+      text-align:center;
+    }
+
+    .row .meta{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+
+    .row .meta .line1{
+      display:flex;
+      gap:8px;
+      align-items:baseline;
+      min-width:0;
+    }
+
+    .row .score{
+      font-weight:1200;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+    }
+
+    .row .date{
+      color:var(--muted);
+      font-weight:850;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .row .line2{
+      color:var(--muted);
+      font-weight:850;
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .row .badge{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(42,27,0,.14);
+      background: rgba(255,255,255,.75);
+      color:var(--muted);
+      font-weight:1100;
+      font-size:12px;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .empty{
+      color:var(--muted);
+      font-weight:900;
+      font-size:12px;
+      padding:10px 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="application" aria-label="Gangetrening">
+      <div class="top">
+        <div>
+          <h1>1-minutts gangetrening</h1>
+        </div>
+        <div class="stats">
+          <div class="pill">Tid: <strong id="timeLeft">60.0</strong>s</div>
+          <div class="pill">Poeng: <strong id="points">0</strong></div>
+          <div class="pill">Streak: <strong id="streak">0</strong></div>
+          <div class="pill lives">
+            Liv:
+            <span class="hearts" id="hearts" aria-label="Liv">
+              <span class="heart">♥</span>
+              <span class="heart">♥</span>
+              <span class="heart">♥</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bar" aria-hidden="true"><div id="timeBar"></div></div>
+
+      <div class="comboLoader" aria-label="Kombo-fremdrift">
+        <div class="comboRow">
+          <span>Kombo</span>
+          <span><strong id="comboLabel">x1</strong> <span class="tiny" id="comboNote"></span></span>
+        </div>
+        <div class="comboBar" aria-hidden="true">
+          <div id="comboBase" class="comboBase"></div>
+          <div id="comboFill" class="comboFill stage1"></div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="panel">
+          <div class="problem">
+            <div class="big" id="problemText">Trykk Start</div>
+            <div class="sub" id="subText">Du har 60 sekunder og 3 liv.</div>
+
+            <div class="answerRow">
+              <input id="answerInput" type="text" inputmode="numeric" autocomplete="off" placeholder="Svar"
+                     disabled aria-label="Svarfelt" />
+            </div>
+
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+            <div id="bigCorrect" class="bigCorrect" aria-live="polite"></div>
+
+            <div class="finishCard" id="finishCard" aria-label="Oppsummering">
+              <div class="finishTitle">
+                <h2>Ferdig</h2>
+                <div class="reason" id="finishReason"></div>
+              </div>
+
+              <div class="tiny">Du fikk:</div>
+              <div class="finishScore"><span id="finishPoints">0</span> poeng</div>
+
+              <div class="finishMeta" id="finishMeta"></div>
+
+              <div class="boxBig" id="slowBoxBig">
+                <h3>Tregeste korrekte (topp 3)</h3>
+                <div id="slowBigEmpty" class="boxBigEmpty" style="display:none;"></div>
+                <ol id="slowBigList" class="boxBigList"></ol>
+              </div>
+
+              <div class="boxBig" id="mistakesBoxBig">
+                <h3>Feil og riktige svar</h3>
+                <div id="mistakesBigEmpty" class="boxBigEmpty" style="display:none;"></div>
+                <ol id="mistakesBigList" class="boxBigList"></ol>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="controls">
+            <div class="diffWrap" aria-label="Velg nivå">
+              <div class="seg" role="group" aria-label="Tabellvalg">
+                <button id="d5" type="button">1–5</button>
+                <button id="d10" type="button" class="active">1–10</button>
+                <button id="d12" type="button">1–12</button>
+              </div>
+            </div>
+
+            <button class="primary" id="startBtn">Start</button>
+            <button id="playAgainBtn" style="display:none;">Spill igjen</button>
+            <div class="divider"></div>
+            <button class="danger" id="stopBtn" disabled>Stopp</button>
+
+            <div class="hiscore" aria-label="Highscore">
+              <div class="hiscoreTop">
+                <h3>Highscore</h3>
+                <small>Dine topp 10 (klikk på en rad)</small>
+              </div>
+              <div id="hiscoreList" class="hiscoreList"></div>
+              <div id="hiscoreEmpty" class="empty" style="display:none;">Ingen runder lagret ennå.</div>
+              <button id="seeOthersBtn" type="button" style="margin-top:10px;">Se andres high scores</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="othersModal" class="modalOverlay" style="display:none;">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-label="Andres highscore">
+      <div class="modalTop">
+        <h3>Andres highscores</h3>
+        <button id="closeOthersBtn" type="button" class="smallBtn">Lukk</button>
+      </div>
+      <div class="modalSub">Topp 100 (klikk på en rad for oppsummering)</div>
+      <div id="othersList" class="hiscoreList modalList"></div>
+      <div id="othersEmpty" class="empty" style="display:none;">Ingen runder lagret ennå.</div>
+    </div>
+  </div>
+
+
+<script>
+(() => {
+  let running = false;
+
+  let time = 60.0;
+  let points = 0;
+
+  let attempts = 0;
+  let correct = 0;
+
+  let streak = 0;
+  let bestStreak = 0;
+  let lives = 3;
+
+  let a = 0;
+  let b = 0;
+
+  const WRONG_PAUSE_MS = 1300;
+
+  let maxFactor = 10;
+
+  // Round timing + mistakes
+  let roundStartPerf = 0;
+  let roundEndPerf = 0;
+  let mistakes = []; // {a,b,userAnswer,correctAnswer}
+
+  // Per-problem timing
+  let currentProblemStartPerf = 0;
+  let correctTimes = []; // {a,b,correctAnswer,sec}
+
+  let rafId = null;
+  let lastNow = 0;
+
+  function timeBonusPerCorrect(){
+    if (maxFactor <= 5) return 0.4;
+    if (maxFactor <= 10) return 0.5;
+    return 0.75;
+  }
+
+  function fmtBonus(x){
+    return String(x).replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
+  }
+
+  function fmtSec(x){
+    return Number(x).toFixed(1);
+  }
+
+  function maxStageForDifficulty() {
+    if (maxFactor <= 5) return 1;
+    if (maxFactor <= 10) return 2;
+    return 3;
+  }
+
+  function stageIndexFromStreak(s) {
+    let idx = 0;
+    if (s >= 15) idx = 3;
+    else if (s >= 10) idx = 2;
+    else if (s >= 5) idx = 1;
+    else idx = 0;
+    return Math.min(idx, maxStageForDifficulty());
+  }
+
+  function stageStart(i) { return [0, 5, 10, 15][i] ?? 0; }
+  function stageSpan(i) { return 5; }
+
+  function multiplierFromStageIndex(i) {
+    if (i === 3) return 5;
+    return i + 1;
+  }
+
+  function classForStage(i) {
+    if (i === 0) return "stage1";
+    if (i === 1) return "stage2";
+    if (i === 2) return "stage3";
+    return "max";
+  }
+
+  function nextThreshold(s) {
+    const cap = maxStageForDifficulty();
+    if (cap === 1) return 5;
+    if (cap === 2) return (s < 5) ? 5 : 10;
+    if (s < 5) return 5;
+    if (s < 10) return 10;
+    if (s < 15) return 15;
+    return 20;
+  }
+
+  function factorWeight(x) {
+    if (x === 10) return 0;
+    if (x <= 2) return 0;
+    if (x <= 5) return 1;
+    if (x <= 7) return 2;
+    if (x <= 9) return 3;
+    if (x === 11) return 4;
+    if (x === 12) return 6;
+    return 4;
+  }
+
+  function basePointsForProblem(a, b) {
+    const hasTen = (a === 10 || b === 10);
+    const w = factorWeight(a) + factorWeight(b);
+    let base = 1 + Math.floor(w / 2);
+    const product = a * b;
+    if (!hasTen && product >= 80) base += 1;
+    return base;
+  }
+
+  function computeSlowestCorrectTop3(list){
+    if (!Array.isArray(list) || list.length === 0) return [];
+    const copy = list.slice().filter(x => x && Number.isFinite(x.sec) && x.sec >= 0);
+    copy.sort((p, q) => q.sec - p.sec);
+    return copy.slice(0, 3);
+  }
+
+  // ========= Highscores (Netlify DB) =========
+  const LS_PROFILE_KEY = "multTrainerProfileV1";
+  const MAX_SCORES = 10;
+
+  function pad2(n){ return String(n).padStart(2, "0"); }
+
+  function fmtDate(ts){
+    const d = new Date(ts);
+    return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${String(d.getFullYear()).slice(-2)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  }
+
+  function normalizeSlowestCorrect(arr){
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter(m => m && Number.isFinite(Number(m.a)) && Number.isFinite(Number(m.b)) && Number.isFinite(Number(m.correctAnswer)) && Number.isFinite(Number(m.sec)))
+      .slice(0, 3)
+      .map(m => ({
+        a: Number(m.a),
+        b: Number(m.b),
+        correctAnswer: Number(m.correctAnswer),
+        sec: Number(m.sec)
+      }));
+  }
+
+  function normalizeEntry(e){
+    const safe = {
+      ts: Number(e?.ts) || Date.now(),
+      points: Number(e?.points) || 0,
+      attempts: Number(e?.attempts) || 0,
+      correct: Number(e?.correct) || 0,
+      accuracy: Number(e?.accuracy) || 0,
+      bestStreak: Number(e?.bestStreak) || 0,
+      maxFactor: Number(e?.maxFactor) || 10,
+      elapsedSec: Number(e?.elapsedSec) || 0,
+      avgSec: Number(e?.avgSec) || 0,
+      reasonText: String(e?.reasonText || "Tidligere runde"),
+      mistakes: Array.isArray(e?.mistakes) ? e.mistakes : [],
+      slowestCorrect: normalizeSlowestCorrect(e?.slowestCorrect),
+      name: String(e?.name || ""),
+      className: String(e?.className || "")
+    };
+
+    safe.mistakes = safe.mistakes
+      .filter(m => m && Number.isFinite(m.a) && Number.isFinite(m.b) && Number.isFinite(m.correctAnswer))
+      .slice(0, 40)
+      .map(m => ({
+        a: Number(m.a),
+        b: Number(m.b),
+        userAnswer: Number.isFinite(Number(m.userAnswer)) ? Number(m.userAnswer) : 0,
+        correctAnswer: Number(m.correctAnswer)
+      }));
+
+    if (!safe.avgSec && safe.attempts > 0 && safe.elapsedSec > 0){
+      safe.avgSec = safe.elapsedSec / safe.attempts;
+    }
+
+    if (!safe.accuracy && safe.attempts > 0){
+      safe.accuracy = Math.round((safe.correct / safe.attempts) * 100);
+    }
+
+    return safe;
+  }
+
+  function getStoredProfile(){
+    try{
+      const raw = localStorage.getItem(LS_PROFILE_KEY);
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      if (!obj || typeof obj !== 'object') return null;
+      return {
+        playerId: String(obj.playerId || ""),
+        name: String(obj.name || ""),
+        className: String(obj.className || "")
+      };
+    }catch{
+      return null;
+    }
+  }
+
+  function saveProfile(p){
+    try{ localStorage.setItem(LS_PROFILE_KEY, JSON.stringify(p)); }catch{}
+  }
+
+  function makePlayerId(){
+    try{
+      if (crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+    }catch{}
+    return "p_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
+  }
+
+  async function ensureProfileAfterFirstGame(){
+    let p = getStoredProfile();
+    if (!p) p = { playerId: makePlayerId(), name: "", className: "" };
+    if (!p.playerId) p.playerId = makePlayerId();
+
+    if (!p.name || !p.className){
+      let name = prompt("Skriv inn navnet ditt:");
+      name = (name ?? "").toString().trim();
+      while (!name){
+        const again = prompt("Navn kan ikke være tomt. Skriv inn navnet ditt:");
+        name = (again ?? "").toString().trim();
+        if (!name && again === null) break;
+      }
+      if (!name) name = "Ukjent";
+
+      let className = prompt("Skriv inn klassen din (f.eks. 8B):");
+      className = (className ?? "").toString().trim();
+      while (!className){
+        const again = prompt("Klasse kan ikke være tom. Skriv inn klassen din:");
+        className = (again ?? "").toString().trim();
+        if (!className && again === null) break;
+      }
+      if (!className) className = "Ukjent";
+
+      p.name = name.slice(0, 40);
+      p.className = className.slice(0, 40);
+      saveProfile(p);
+    }
+
+    return p;
+  }
+
+  async function apiSubmitScore(profile, entry){
+    const payload = {
+      playerId: profile.playerId,
+      name: profile.name,
+      className: profile.className,
+      ...entry
+    };
+
+    const res = await fetch("/.netlify/functions/submit-score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`submit-score feilet (${res.status}): ${txt}`);
+    }
+
+    return res.json().catch(() => ({ ok: true }));
+  }
+
+  async function apiGetMyScores(playerId){
+    const url = `/.netlify/functions/get-my-scores?playerId=${encodeURIComponent(playerId)}`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`get-my-scores feilet (${res.status}): ${txt}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  }
+
+  async function apiGetTopScores(limit = 100){
+    const url = `/.netlify/functions/get-top-scores?limit=${encodeURIComponent(String(limit))}`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`get-top-scores feilet (${res.status}): ${txt}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  }
+
+  let myScoresCache = [];
+
+  async function refreshMyScores(){
+    const p = getStoredProfile();
+    if (!p || !p.playerId){
+      myScoresCache = [];
+      renderMyScores([]);
+      return;
+    }
+
+    try{
+      const list = await apiGetMyScores(p.playerId);
+      myScoresCache = list.map(normalizeEntry);
+      renderMyScores(myScoresCache);
+    }catch(e){
+      console.warn("Kunne ikke hente highscores", e);
+      myScoresCache = [];
+      renderMyScores([]);
+      hiscoreEmptyEl.style.display = "block";
+      hiscoreEmptyEl.textContent = "Får ikke kontakt med serveren.";
+    }
+  }
+
+
+  // ========= UI refs =========
+  const timeLeftEl = document.getElementById("timeLeft");
+  const pointsEl = document.getElementById("points");
+  const timeBar = document.getElementById("timeBar");
+
+  const streakEl = document.getElementById("streak");
+  const heartsEl = document.getElementById("hearts");
+
+  const problemText = document.getElementById("problemText");
+  const subText = document.getElementById("subText");
+  const answerInput = document.getElementById("answerInput");
+
+  const feedbackEl = document.getElementById("feedback");
+  const bigCorrectEl = document.getElementById("bigCorrect");
+
+  const comboLabelEl = document.getElementById("comboLabel");
+  const comboNoteEl = document.getElementById("comboNote");
+  const comboBaseEl = document.getElementById("comboBase");
+  const comboFillEl = document.getElementById("comboFill");
+
+  const startBtn = document.getElementById("startBtn");
+  const stopBtn = document.getElementById("stopBtn");
+  const playAgainBtn = document.getElementById("playAgainBtn");
+
+  const hiscoreListEl = document.getElementById("hiscoreList");
+  const hiscoreEmptyEl = document.getElementById("hiscoreEmpty");
+
+  const seeOthersBtn = document.getElementById("seeOthersBtn");
+  const othersModal = document.getElementById("othersModal");
+  const closeOthersBtn = document.getElementById("closeOthersBtn");
+  const othersListEl = document.getElementById("othersList");
+  const othersEmptyEl = document.getElementById("othersEmpty");
+
+  const d5 = document.getElementById("d5");
+  const d10 = document.getElementById("d10");
+  const d12 = document.getElementById("d12");
+  const diffButtons = [d5, d10, d12];
+
+  // Finish card refs
+  const finishCardEl = document.getElementById("finishCard");
+  const finishReasonEl = document.getElementById("finishReason");
+  const finishPointsEl = document.getElementById("finishPoints");
+  const finishMetaEl = document.getElementById("finishMeta");
+
+  const slowBigListEl = document.getElementById("slowBigList");
+  const slowBigEmptyEl = document.getElementById("slowBigEmpty");
+
+  const mistakesBigListEl = document.getElementById("mistakesBigList");
+  const mistakesBigEmptyEl = document.getElementById("mistakesBigEmpty");
+
+  // ========= Highscore render + click -> summary =========
+  function renderMyScores(list){
+    hiscoreListEl.innerHTML = "";
+    if (!list || list.length === 0){
+      hiscoreEmptyEl.style.display = "block";
+      hiscoreEmptyEl.textContent = "Ingen runder lagret ennå.";
+      return;
+    }
+    hiscoreEmptyEl.style.display = "none";
+
+    list.slice(0, MAX_SCORES).forEach((e, idx) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.title = "Klikk for oppsummering";
+
+      const rank = document.createElement("div");
+      rank.className = "rank";
+      rank.textContent = String(idx + 1);
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const line1 = document.createElement("div");
+      line1.className = "line1";
+
+      const score = document.createElement("div");
+      score.className = "score";
+      score.textContent = `${e.points}p`;
+
+      const date = document.createElement("div");
+      date.className = "date";
+      date.textContent = fmtDate(e.ts);
+
+      line1.appendChild(score);
+      line1.appendChild(date);
+
+      const line2 = document.createElement("div");
+      line2.className = "line2";
+      line2.textContent = `${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
+
+      meta.appendChild(line1);
+      meta.appendChild(line2);
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+      badge.textContent = `Tabell 1–${e.maxFactor}`;
+
+      row.appendChild(rank);
+      row.appendChild(meta);
+      row.appendChild(badge);
+
+      row.addEventListener("click", () => {
+        if (running) return;
+        showFinishCardFromEntry(e);
+      });
+
+      hiscoreListEl.appendChild(row);
+    });
+  }
+
+  function openOthersModal(){
+    othersModal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+    loadOthersScores();
+  }
+
+  function closeOthersModal(){
+    othersModal.style.display = "none";
+    document.body.style.overflow = "";
+  }
+
+  async function loadOthersScores(){
+    othersListEl.innerHTML = "";
+    othersEmptyEl.style.display = "none";
+
+    const loading = document.createElement("div");
+    loading.className = "empty";
+    loading.textContent = "Laster…";
+    othersListEl.appendChild(loading);
+
+    try{
+      const list = (await apiGetTopScores(100)).map(normalizeEntry);
+      renderOthersScores(list);
+    }catch(e){
+      console.warn("Kunne ikke hente toppscore", e);
+      othersListEl.innerHTML = "";
+      othersEmptyEl.style.display = "block";
+      othersEmptyEl.textContent = "Får ikke kontakt med serveren.";
+    }
+  }
+
+  function renderOthersScores(list){
+    othersListEl.innerHTML = "";
+
+    if (!list || list.length === 0){
+      othersEmptyEl.style.display = "block";
+      othersEmptyEl.textContent = "Ingen runder lagret ennå.";
+      return;
+    }
+
+    othersEmptyEl.style.display = "none";
+
+    list.slice(0, 100).forEach((e, idx) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.title = "Klikk for oppsummering";
+
+      const rank = document.createElement("div");
+      rank.className = "rank";
+      rank.textContent = String(idx + 1);
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+
+      const line1 = document.createElement("div");
+      line1.className = "line1";
+
+      const score = document.createElement("div");
+      score.className = "score";
+      score.textContent = `${e.points}p`;
+
+      const date = document.createElement("div");
+      date.className = "date";
+      date.textContent = fmtDate(e.ts);
+
+      line1.appendChild(score);
+      line1.appendChild(date);
+
+      const line2 = document.createElement("div");
+      line2.className = "line2";
+      const who = [e.name, e.className].filter(Boolean).join(" • ") || "Ukjent";
+      line2.textContent = `${who} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
+
+      meta.appendChild(line1);
+      meta.appendChild(line2);
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+      badge.textContent = `#${idx + 1}`;
+
+      row.appendChild(rank);
+      row.appendChild(meta);
+      row.appendChild(badge);
+
+      row.addEventListener("click", () => {
+        if (running) return;
+        closeOthersModal();
+        showFinishCardFromEntry(e);
+      });
+
+      othersListEl.appendChild(row);
+    });
+  }
+
+
+  // ========= Difficulty =========
+  function setDifficulty(n) {
+    maxFactor = n;
+    diffButtons.forEach(btn => btn.classList.remove("active"));
+    if (n === 5) d5.classList.add("active");
+    if (n === 10) d10.classList.add("active");
+    if (n === 12) d12.classList.add("active");
+
+    if (!running) {
+      subText.textContent = `Du har 60 sekunder og 3 liv. (1–${maxFactor})`;
+    }
+    updateComboMeter();
+  }
+
+  function rand1toMax() {
+    return Math.floor(Math.random() * maxFactor) + 1;
+  }
+
+  // ========= UI helpers =========
+  function setFeedback(type, text, tagText) {
+    feedbackEl.className = "feedback";
+    feedbackEl.textContent = "";
+    if (!text) return;
+
+    if (type === "good") feedbackEl.classList.add("good");
+    if (type === "bad") feedbackEl.classList.add("bad");
+
+    const msg = document.createElement("span");
+    msg.textContent = text;
+    feedbackEl.appendChild(msg);
+
+    if (tagText) {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = tagText;
+      feedbackEl.appendChild(tag);
+    }
+  }
+
+  function showBigCorrect(answer) {
+    bigCorrectEl.textContent = `Riktig svar: ${answer}`;
+    bigCorrectEl.classList.add("show");
+  }
+
+  function hideBigCorrect() {
+    bigCorrectEl.textContent = "";
+    bigCorrectEl.classList.remove("show");
+  }
+
+  function updateHearts() {
+    const nodes = heartsEl.querySelectorAll(".heart");
+    nodes.forEach((n, idx) => {
+      const i = idx + 1;
+      n.classList.toggle("off", i > lives);
+    });
+  }
+
+  function updateComboMeter() {
+    const cap = maxStageForDifficulty();
+
+    const stageIndex = stageIndexFromStreak(streak);
+    const mult = multiplierFromStageIndex(stageIndex);
+    comboLabelEl.textContent = `x${mult}`;
+
+    const start = stageStart(stageIndex);
+    const span = stageSpan(stageIndex);
+
+    let ratio = (streak - start) / span;
+    ratio = Math.max(0, Math.min(1, ratio));
+
+    const isMaxForDifficulty = (stageIndex === cap) && (streak >= start + span);
+    if (isMaxForDifficulty) ratio = 1;
+
+    if (stageIndex === 0) {
+      comboBaseEl.className = "comboBase";
+    } else {
+      comboBaseEl.className = "comboBase " + classForStage(stageIndex - 1);
+    }
+
+    if (cap === 3 && stageIndex === 3) {
+      const fillClass = (ratio >= 1) ? "max" : "maxBuild";
+      comboFillEl.className = "comboFill " + fillClass;
+      comboNoteEl.textContent = (streak >= 20) ? "MAX" : `→ 20`;
+    } else {
+      comboFillEl.className = "comboFill " + classForStage(stageIndex);
+
+      const next = nextThreshold(streak);
+      const isMaxCapReached =
+        (cap === 1 && streak >= 5) ||
+        (cap === 2 && streak >= 10);
+
+      comboNoteEl.textContent = isMaxCapReached ? "MAX" : `→ ${next}`;
+    }
+
+    comboFillEl.style.transform = `scaleX(${ratio})`;
+  }
+
+  function updateUI() {
+    timeLeftEl.textContent = time.toFixed(1);
+    pointsEl.textContent = String(points);
+    streakEl.textContent = String(streak);
+
+    updateHearts();
+    updateComboMeter();
+
+    const ratio = Math.max(0, Math.min(1, time / 60));
+    timeBar.style.transform = `scaleX(${ratio})`;
+  }
+
+  function newProblem() {
+    a = rand1toMax();
+    b = rand1toMax();
+    problemText.textContent = `${a} × ${b} = ?`;
+    subText.textContent = `Trykk Enter for å svare. (1–${maxFactor})`;
+    hideBigCorrect();
+
+    // start timing for this problem
+    currentProblemStartPerf = performance.now();
+
+    answerInput.value = "";
+    answerInput.focus();
+  }
+
+  function lockGameUI() {
+    answerInput.disabled = true;
+    stopBtn.disabled = true;
+    startBtn.disabled = false;
+    startBtn.style.display = "none";
+    playAgainBtn.style.display = "block";
+  }
+
+  function stopClock() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  }
+
+  // ========= Finish card rendering =========
+  function showFinishCardFromData(data){
+    const elapsedSec = Number(data.elapsedSec) || 0;
+    const attemptsLocal = Number(data.attempts) || 0;
+    const correctLocal = Number(data.correct) || 0;
+    const accuracyLocal = Number.isFinite(Number(data.accuracy)) ? Number(data.accuracy) : (attemptsLocal ? Math.round((correctLocal/attemptsLocal)*100) : 0);
+    const bestStreakLocal = Number(data.bestStreak) || 0;
+    const maxFactorLocal = Number(data.maxFactor) || 10;
+    const pointsLocal = Number(data.points) || 0;
+    const avg = (attemptsLocal > 0) ? ((Number(data.avgSec) || (elapsedSec/attemptsLocal)) ) : 0;
+
+    finishCardEl.classList.add("show");
+    finishReasonEl.textContent = String(data.reasonText || "");
+    finishPointsEl.textContent = String(pointsLocal);
+
+    finishMetaEl.innerHTML = `
+      <div class="metaTile">
+        <div class="k">Resultat</div>
+        <div class="v">${correctLocal}/${attemptsLocal}</div>
+        <div class="s">${accuracyLocal}% riktig • beste streak ${bestStreakLocal}</div>
+      </div>
+      <div class="metaTile">
+        <div class="k">Tid</div>
+        <div class="v">${fmtSec(elapsedSec)}s</div>
+        <div class="s">Snitt ${fmtSec(avg)}s per spørsmål</div>
+      </div>
+      <div class="metaTile">
+        <div class="k">Feil</div>
+        <div class="v">${Array.isArray(data.mistakes) ? data.mistakes.length : 0}</div>
+        <div class="s">Tabell 1–${maxFactorLocal}</div>
+      </div>
+      <div class="metaTile">
+        <div class="k">Kombo</div>
+        <div class="v">${bestStreakLocal}</div>
+        <div class="s">Beste streak i runden</div>
+      </div>
+    `;
+
+    // slowest correct
+    slowBigListEl.innerHTML = "";
+    const slow = Array.isArray(data.slowestCorrect) ? data.slowestCorrect : [];
+    if (slow.length === 0){
+      slowBigEmptyEl.style.display = "block";
+      slowBigEmptyEl.textContent = "Ingen data.";
+    } else {
+      slowBigEmptyEl.style.display = "none";
+      slow.forEach(s => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          ${s.a} × ${s.b} = ${s.correctAnswer}
+          <span class="muted">—</span> ${fmtSec(s.sec)}s
+        `;
+        slowBigListEl.appendChild(li);
+      });
+    }
+
+    // mistakes
+    mistakesBigListEl.innerHTML = "";
+    const list = Array.isArray(data.mistakes) ? data.mistakes : [];
+
+    if (list.length === 0){
+      mistakesBigEmptyEl.style.display = "block";
+      mistakesBigEmptyEl.textContent = "Ingen feil i denne runden.";
+    } else {
+      mistakesBigEmptyEl.style.display = "none";
+      list.forEach((m) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          ${m.a} × ${m.b}
+          <span class="muted">— du svarte</span> ${m.userAnswer}
+          <span class="muted">, riktig:</span> ${m.correctAnswer}
+        `;
+        mistakesBigListEl.appendChild(li);
+      });
+    }
+  }
+
+  function showFinishCard(reasonText, elapsedSec){
+    const slowestCorrect = computeSlowestCorrectTop3(correctTimes);
+    showFinishCardFromData({
+      reasonText,
+      points,
+      attempts,
+      correct,
+      accuracy: attempts ? Math.round((correct/attempts)*100) : 0,
+      bestStreak,
+      maxFactor,
+      elapsedSec,
+      avgSec: attempts ? (elapsedSec/attempts) : 0,
+      mistakes,
+      slowestCorrect
+    });
+  }
+
+  function showFinishCardFromEntry(entry){
+    problemText.textContent = "Ferdig";
+    subText.textContent = "Oppsummering fra highscore";
+    const mf = Number(entry.maxFactor) || 10;
+    setDifficulty(mf);
+    showFinishCardFromData(entry);
+    updateUI();
+  }
+
+  function hideFinishCard(){
+    finishCardEl.classList.remove("show");
+    finishReasonEl.textContent = "";
+    finishPointsEl.textContent = "0";
+    finishMetaEl.innerHTML = "";
+
+    slowBigListEl.innerHTML = "";
+    slowBigEmptyEl.style.display = "none";
+
+    mistakesBigListEl.innerHTML = "";
+    mistakesBigEmptyEl.style.display = "none";
+  }
+
+  // ========= Lifecycle =========
+  function resetAll() {
+    running = false;
+
+    time = 60.0;
+    points = 0;
+    attempts = 0;
+    correct = 0;
+
+    streak = 0;
+    bestStreak = 0;
+    lives = 3;
+
+    mistakes = [];
+    correctTimes = [];
+    currentProblemStartPerf = 0;
+
+    roundStartPerf = 0;
+    roundEndPerf = 0;
+
+    problemText.textContent = "Trykk Start";
+    subText.textContent = `Du har 60 sekunder og 3 liv. (1–${maxFactor})`;
+    answerInput.value = "";
+    answerInput.disabled = true;
+
+    setFeedback("", "");
+    hideBigCorrect();
+    hideFinishCard();
+
+    startBtn.disabled = false;
+    startBtn.style.display = "block";
+    playAgainBtn.style.display = "none";
+    stopBtn.disabled = true;
+
+    diffButtons.forEach(b => b.disabled = false);
+
+    stopClock();
+    updateUI();
+  }
+
+  function endGame(reason) {
+    running = false;
+    stopClock();
+
+    roundEndPerf = performance.now();
+    const elapsedSec = roundStartPerf ? Math.max(0, (roundEndPerf - roundStartPerf) / 1000) : 0;
+
+    answerInput.disabled = true;
+    stopBtn.disabled = true;
+
+    problemText.textContent = "Ferdig";
+    let reasonText = "Tiden er ute.";
+    if (reason === "lives") reasonText = "Du mistet alle liv.";
+    if (reason === "stop") reasonText = "Stoppa.";
+
+    subText.textContent = reasonText;
+
+    setFeedback("", "");
+    hideBigCorrect();
+
+    showFinishCard(reasonText, elapsedSec);
+
+    const accuracy = attempts === 0 ? 0 : Math.round((correct / attempts) * 100);
+    const slowestCorrect = computeSlowestCorrectTop3(correctTimes);
+
+    if (attempts > 0) {
+      const entry = normalizeEntry({
+        ts: Date.now(),
+        points,
+        attempts,
+        correct,
+        accuracy,
+        bestStreak,
+        maxFactor,
+        elapsedSec,
+        avgSec: attempts ? (elapsedSec / attempts) : 0,
+        reasonText,
+        mistakes,
+        slowestCorrect
+      });
+
+      (async () => {
+        try{
+          const profile = await ensureProfileAfterFirstGame();
+          await apiSubmitScore(profile, entry);
+        }catch(err){
+          console.warn("Kunne ikke lagre highscore", err);
+        }finally{
+          refreshMyScores().catch(() => {});
+        }
+      })();
+    } else {
+      refreshMyScores().catch(() => {});
+    }
+
+    diffButtons.forEach(b => b.disabled = false);
+    lockGameUI();
+    updateUI();
+  }
+
+  function tick(now) {
+    if (!running) return;
+
+    if (!lastNow) lastNow = now;
+    const dt = (now - lastNow) / 1000;
+    lastNow = now;
+
+    time -= dt;
+
+    if (time <= 0) {
+      time = 0;
+      updateUI();
+      endGame("time");
+      return;
+    }
+
+    updateUI();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function startClock() {
+    stopClock();
+    lastNow = 0;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function startGame() {
+    resetAll();
+    running = true;
+    roundStartPerf = performance.now();
+
+    startBtn.disabled = true;
+    startBtn.style.display = "none";
+    playAgainBtn.style.display = "none";
+    stopBtn.disabled = false;
+
+    answerInput.disabled = false;
+    diffButtons.forEach(b => b.disabled = true);
+
+    newProblem();
+    updateUI();
+    startClock();
+  }
+
+  function submitAnswer() {
+    if (!running) return;
+
+    const raw = answerInput.value.trim();
+    if (raw === "") return;
+
+    const userAnswer = Number(raw);
+    if (!Number.isFinite(userAnswer)) return;
+
+    const correctAnswer = a * b;
+    attempts += 1;
+
+    if (userAnswer === correctAnswer) {
+      correct += 1;
+
+      // time spent on this correct question
+      const now = performance.now();
+      const spent = currentProblemStartPerf ? Math.max(0, (now - currentProblemStartPerf) / 1000) : 0;
+      correctTimes.push({ a, b, correctAnswer, sec: spent });
+
+      const bonus = timeBonusPerCorrect();
+      time += bonus;
+
+      streak += 1;
+      if (streak > bestStreak) bestStreak = streak;
+
+      const stageIndex = stageIndexFromStreak(streak);
+      const mult = multiplierFromStageIndex(stageIndex);
+
+      const base = basePointsForProblem(a, b);
+      const gained = base * mult;
+
+      points += gained;
+
+      const bonusTxt = `+${fmtBonus(bonus)}s`;
+
+      const msg = `Korrekt, ${a} × ${b} = ${correctAnswer}`;
+      const tag = (mult === 1)
+        ? `+${gained} (base ${base}) • ${bonusTxt}`
+        : `+${gained} (${base}×x${mult}) • ${bonusTxt}`;
+
+      setFeedback("good", msg, tag);
+
+      updateUI();
+      newProblem();
+      return;
+    }
+
+    mistakes.push({ a, b, userAnswer, correctAnswer });
+
+    lives -= 1;
+    streak = 0;
+
+    setFeedback("bad", "Feil", "Du mister 1 liv");
+    showBigCorrect(correctAnswer);
+
+    if (lives <= 0) {
+      lives = 0;
+      updateUI();
+      answerInput.disabled = true;
+      setTimeout(() => {
+        if (!running) return;
+        endGame("lives");
+      }, WRONG_PAUSE_MS);
+      return;
+    }
+
+    updateUI();
+
+    answerInput.disabled = true;
+    setTimeout(() => {
+      if (!running) return;
+      answerInput.disabled = false;
+      newProblem();
+    }, WRONG_PAUSE_MS);
+  }
+
+  // ========= Events =========
+  d5.addEventListener("click", () => { if (!running) setDifficulty(5); });
+  d10.addEventListener("click", () => { if (!running) setDifficulty(10); });
+  d12.addEventListener("click", () => { if (!running) setDifficulty(12); });
+
+  startBtn.addEventListener("click", startGame);
+  playAgainBtn.addEventListener("click", startGame);
+
+  stopBtn.addEventListener("click", () => {
+    if (!running) return;
+    endGame("stop");
+  });
+
+  seeOthersBtn.addEventListener("click", () => {
+    if (running) return;
+    openOthersModal();
+  });
+
+  closeOthersBtn.addEventListener("click", closeOthersModal);
+
+  othersModal.addEventListener("click", (e) => {
+    if (e.target === othersModal) closeOthersModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && othersModal.style.display === "flex") closeOthersModal();
+  });
+
+
+  answerInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      submitAnswer();
+    }
+  });
+
+  answerInput.addEventListener("input", () => {
+    answerInput.value = answerInput.value.replace(/[^\d-]/g, "");
+  });
+
+  // ========= init =========
+  setDifficulty(10);
+  resetAll();
+  refreshMyScores().catch(() => {});
+})();
+</script>
+</body>
+</html>

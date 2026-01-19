@@ -1126,26 +1126,27 @@
   }
 
   async function apiSubmitScore(profile, entry){
-    const payload = {
-      playerId: profile.playerId,
-      name: profile.name,
-      className: profile.className,
-      ...entry
-    };
+  const payload = {
+    ...entry,
+    playerId: profile.playerId,
+    name: profile.name,
+    className: profile.className
+  };
 
-    const res = await fetch("/.netlify/functions/submit-score", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+  const res = await fetch("/.netlify/functions/submit-score", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
 
-    if (!res.ok){
-      const txt = await res.text().catch(() => "");
-      throw new Error(`submit-score feilet (${res.status}): ${txt}`);
-    }
-
-    return res.json().catch(() => ({ ok: true }));
+  if (!res.ok){
+    const txt = await res.text().catch(() => "");
+    throw new Error(`submit-score feilet (${res.status}): ${txt}`);
   }
+
+  return res.json().catch(() => ({ ok: true }));
+}
+
 
   async function apiGetMyScores(playerId){
     const url = `/.netlify/functions/get-my-scores?playerId=${encodeURIComponent(playerId)}`;

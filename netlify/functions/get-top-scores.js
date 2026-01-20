@@ -1,4 +1,3 @@
-```js
 import { ensureSchema, sqlQuery, jsonResponse, methodNotAllowed } from "./_db.js";
 
 // Behavior:
@@ -137,4 +136,3 @@ export default async (req) => {
 
   return jsonResponse(out);
 };
-```

@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Highscore – oversikt</title>
+  <style>
+    :root{
+      --bg1:#ffb703;
+      --bg2:#fb8500;
+      --card:#fff7db;
+      --text:#2a1b00;
+      --muted:#6a4a00;
+      --border:rgba(42,27,0,.18);
+      --shadow:0 18px 50px rgba(60,30,0,.22);
+      --radius:18px;
+      --good:#1f8f3a;
+      --bad:#d62828;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1100px 700px at 15% 15%, rgba(255,214,10,.85), transparent 60%),
+        radial-gradient(1000px 650px at 85% 35%, rgba(251,133,0,.85), transparent 58%),
+        radial-gradient(900px 600px at 55% 95%, rgba(255,183,3,.92), transparent 62%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    .wrap{ width:min(1060px, 92vw); padding:24px; }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,247,219,.92));
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding:22px;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-60px -60px auto auto;
+      width:220px;
+      height:220px;
+      border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,109,0,.35), rgba(255,109,0,0) 70%);
+      pointer-events:none;
+    }
+
+    .top{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:14px;
+    }
+
+    h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+      font-weight:950;
+    }
+
+    .sub{
+      margin:4px 0 0 0;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:2px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.85);
+      color: var(--text);
+      border-radius:999px;
+      padding:10px 12px;
+      font-size:13px;
+      font-weight:950;
+      cursor:pointer;
+      transition: transform .05s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      box-shadow: 0 12px 22px rgba(60,30,0,.10);
+    }
+
+    button:hover{
+      background: rgba(255,255,255,.95);
+      border-color: rgba(255,109,0,.45);
+      box-shadow: 0 18px 28px rgba(255,109,0,.18);
+    }
+
+    button:active{ transform: translateY(1px); }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(42,27,0,.18);
+      background: rgba(255,255,255,.75);
+      color:var(--muted);
+      font-size:13px;
+      min-width:180px;
+      justify-content:center;
+      box-shadow: 0 10px 20px rgba(60,30,0,.08);
+      font-weight:900;
+    }
+    .pill strong{
+      color:var(--text);
+      font-weight:1100;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .content{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:18px;
+      margin-top:14px;
+    }
+
+    @media (max-width: 860px){
+      .content{ grid-template-columns: 1fr; }
+      .pill{ min-width: 160px; }
+    }
+
+    .panel{
+      border:1px solid rgba(42,27,0,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,247,219,.75));
+      border-radius: var(--radius);
+      padding:18px;
+      box-shadow: 0 16px 30px rgba(60,30,0,.10);
+      min-height: 320px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .panelHead{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .panelHead h2{
+      margin:0;
+      font-size:14px;
+      font-weight:1100;
+      letter-spacing:.2px;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .panelHead .meta{
+      margin:0;
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height: 520px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 26px 1fr auto;
+      gap:10px;
+      align-items:center;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid rgba(42,27,0,.12);
+      background: rgba(255,247,219,.62);
+      transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+    }
+
+    .row:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,109,0,.35);
+      box-shadow: 0 16px 26px rgba(60,30,0,.10);
+      background: rgba(255,247,219,.78);
+    }
+
+    .rank{
+      font-weight:1100;
+      color:var(--muted);
+      font-variant-numeric: tabular-nums;
+      text-align:center;
+    }
+
+    .metaCol{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+
+    .line1{
+      display:flex;
+      gap:8px;
+      align-items:baseline;
+      min-width:0;
+    }
+
+    .score{
+      font-weight:1200;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+    }
+
+    .date{
+      color:var(--muted);
+      font-weight:850;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .line2{
+      color:var(--muted);
+      font-weight:850;
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .badge{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(42,27,0,.14);
+      background: rgba(255,255,255,.75);
+      color:var(--muted);
+      font-weight:1100;
+      font-size:12px;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .empty{
+      color:var(--muted);
+      font-weight:900;
+      font-size:12px;
+      padding:8px 2px;
+    }
+
+    .good{ color: var(--good); font-weight:1100; }
+    .bad{ color: var(--bad); font-weight:1100; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div>
+          <h1>Highscore – oversikt</h1>
+          <div class="sub">Top 5 globalt + beste klasse (snitt av topp 10, viser topp 3)</div>
+        </div>
+
+        <div class="actions">
+          <div class="pill">Status: <strong id="status">Laster…</strong></div>
+          <button id="refreshBtn" type="button">Oppdater</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="panel" aria-label="Global top 5">
+          <div class="panelHead">
+            <h2>Top 5 (alle)</h2>
+            <div class="meta" id="globalMeta"></div>
+          </div>
+          <div class="list" id="globalList"></div>
+          <div class="empty" id="globalEmpty" style="display:none;"></div>
+        </div>
+
+        <div class="panel" aria-label="Beste klasse">
+          <div class="panelHead">
+            <h2>Beste klasse</h2>
+            <div class="meta" id="bestMeta"></div>
+          </div>
+          <div class="list" id="bestList"></div>
+          <div class="empty" id="bestEmpty" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // Expected Netlify functions (same origin):
+  // 1) GET /.netlify/functions/get-top-scores            -> global top list (usually unique names)
+  // 2) GET /.netlify/functions/get-top-scores?className=8A[&limit=10] -> per-class top list
+  //
+  // This page calculates best class by average points of the 10 best in the class.
+  // If API returns fewer than 10, it uses what's available and reports count.
+
+  const ALL_CLASSES = ["8A","8B","8C","8D","9A","9B","9C","9D","9E","10A","10B","10C","10D","10E"];
+
+  const statusEl = document.getElementById("status");
+  const refreshBtn = document.getElementById("refreshBtn");
+
+  const globalListEl = document.getElementById("globalList");
+  const globalEmptyEl = document.getElementById("globalEmpty");
+  const globalMetaEl = document.getElementById("globalMeta");
+
+  const bestListEl = document.getElementById("bestList");
+  const bestEmptyEl = document.getElementById("bestEmpty");
+  const bestMetaEl = document.getElementById("bestMeta");
+
+  function pad2(n){ return String(n).padStart(2, "0"); }
+
+  function fmtDate(ts){
+    const d = new Date(Number(ts) || Date.now());
+    return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${String(d.getFullYear()).slice(-2)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  }
+
+  function normalizeEntry(e){
+    return {
+      ts: Number(e?.ts) || Date.now(),
+      points: Number(e?.points) || 0,
+      name: String(e?.name || "Ukjent"),
+      className: String(e?.className || ""),
+      correct: Number(e?.correct) || 0,
+      attempts: Number(e?.attempts) || 0,
+      accuracy: Number(e?.accuracy) || (e?.attempts ? Math.round((Number(e.correct)||0)/(Number(e.attempts)||1)*100) : 0),
+      bestStreak: Number(e?.bestStreak) || 0,
+      maxFactor: Number(e?.maxFactor) || 10
+    };
+  }
+
+  async function apiGetGlobalTopScores(){
+    const url = `/.netlify/functions/get-top-scores`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`get-top-scores (global) feilet (${res.status}): ${txt}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data.map(normalizeEntry) : [];
+  }
+
+  async function apiGetClassTopScores(className, limit){
+    // limit is optional; if function ignores it, result size will be whatever server returns
+    const qs = new URLSearchParams();
+    qs.set("className", String(className || ""));
+    if (Number.isFinite(Number(limit)) && Number(limit) > 0) qs.set("limit", String(Number(limit)));
+
+    const url = `/.netlify/functions/get-top-scores?${qs.toString()}`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`get-top-scores (class ${className}) feilet (${res.status}): ${txt}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data.map(normalizeEntry) : [];
+  }
+
+  function setStatus(text, kind){
+    statusEl.textContent = text;
+    statusEl.className = "";
+    if (kind === "good") statusEl.classList.add("good");
+    if (kind === "bad") statusEl.classList.add("bad");
+  }
+
+  function clearBoard(listEl, emptyEl, emptyText){
+    listEl.innerHTML = "";
+    emptyEl.style.display = "none";
+    emptyEl.textContent = emptyText || "";
+  }
+
+  function renderBoard(listEl, emptyEl, entries, opts){
+    const titleMode = String(opts?.mode || "global");
+    const maxRows = Number(opts?.maxRows || 5);
+
+    listEl.innerHTML = "";
+
+    if (!entries || entries.length === 0){
+      emptyEl.style.display = "block";
+      emptyEl.textContent = "Ingen runder lagret ennå.";
+      return;
+    }
+
+    emptyEl.style.display = "none";
+
+    entries.slice(0, maxRows).forEach((e, idx) => {
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const rank = document.createElement("div");
+      rank.className = "rank";
+      rank.textContent = String(idx + 1);
+
+      const meta = document.createElement("div");
+      meta.className = "metaCol";
+
+      const line1 = document.createElement("div");
+      line1.className = "line1";
+
+      const score = document.createElement("div");
+      score.className = "score";
+      score.textContent = `${e.points}p`;
+
+      const date = document.createElement("div");
+      date.className = "date";
+      date.textContent = fmtDate(e.ts);
+
+      line1.appendChild(score);
+      line1.appendChild(date);
+
+      const line2 = document.createElement("div");
+      line2.className = "line2";
+
+      if (titleMode === "global"){
+        const who = [e.name, e.className].filter(Boolean).join(" • ") || "Ukjent";
+        line2.textContent = `${who} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
+      } else {
+        line2.textContent = `${e.name || "Ukjent"} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
+      }
+
+      meta.appendChild(line1);
+      meta.appendChild(line2);
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+      badge.textContent = `#${idx + 1}`;
+
+      row.appendChild(rank);
+      row.appendChild(meta);
+      row.appendChild(badge);
+
+      listEl.appendChild(row);
+    });
+  }
+
+  function avgPointsTopN(list, n){
+    const arr = (Array.isArray(list) ? list : []).slice(0, n);
+    if (arr.length === 0) return { avg: 0, count: 0 };
+    const sum = arr.reduce((acc, e) => acc + (Number(e?.points) || 0), 0);
+    return { avg: sum / arr.length, count: arr.length };
+  }
+
+  async function computeBestClass(){
+    // Fetch each class top list (try limit 10)
+    const jobs = ALL_CLASSES.map(async (cls) => {
+      try{
+        const list = await apiGetClassTopScores(cls, 10);
+        const { avg, count } = avgPointsTopN(list, 10);
+        return { className: cls, avg, count, list };
+      }catch{
+        return { className: cls, avg: -1, count: 0, list: [] };
+      }
+    });
+
+    const results = await Promise.all(jobs);
+
+    const valid = results.filter(r => r.avg >= 0 && r.count > 0);
+    if (valid.length === 0) return null;
+
+    valid.sort((a, b) => b.avg - a.avg);
+    return valid[0];
+  }
+
+  async function loadAll(){
+    setStatus("Laster…");
+
+    clearBoard(globalListEl, globalEmptyEl, "");
+    clearBoard(bestListEl, bestEmptyEl, "");
+
+    globalMetaEl.textContent = "";
+    bestMetaEl.textContent = "";
+
+    try{
+      const global = await apiGetGlobalTopScores();
+      renderBoard(globalListEl, globalEmptyEl, global, { maxRows: 5, mode: "global" });
+
+      globalMetaEl.textContent = `Viser topp 5 (av ${global.length})`;
+
+      const best = await computeBestClass();
+      if (!best){
+        bestEmptyEl.style.display = "block";
+        bestEmptyEl.textContent = "Fant ingen klasse-data.";
+        bestMetaEl.textContent = "";
+        setStatus("OK", "good");
+        return;
+      }
+
+      const top3 = best.list.slice(0, 3);
+      renderBoard(bestListEl, bestEmptyEl, top3, { maxRows: 3, mode: "class" });
+
+      const avgRounded = Math.round(best.avg * 10) / 10;
+      bestMetaEl.textContent = `${best.className} • snitt ${avgRounded}p (topp ${best.count}/10) • viser topp 3`;
+
+      setStatus("OK", "good");
+    }catch(e){
+      console.warn(e);
+      setStatus("Feil", "bad");
+
+      globalEmptyEl.style.display = "block";
+      globalEmptyEl.textContent = "Får ikke kontakt med serveren.";
+
+      bestEmptyEl.style.display = "block";
+      bestEmptyEl.textContent = "Får ikke kontakt med serveren.";
+    }
+  }
+
+  refreshBtn.addEventListener("click", loadAll);
+
+  loadAll();
+})();
+</script>
+</body>
+</html>

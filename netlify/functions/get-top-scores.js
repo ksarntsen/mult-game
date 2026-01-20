@@ -17,14 +17,21 @@ export default async (req) => {
   const className = (url.searchParams.get("className") || "").trim();
   const isClass = Boolean(className);
 
-  const limitParamRaw = url.searchParams.get("limit");
-  const limitParam = Number(limitParamRaw);
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
   const defaultLimit = isClass ? 5 : 25;
-  const limit = Number.isFinite(limitParam)
-    ? clamp(Math.floor(limitParam), isClass ? 1 : 1, isClass ? 200 : 500)
-    : defaultLimit;
+
+  let limit = defaultLimit;
+
+  // IMPORTANT: only parse if the param exists
+  if (url.searchParams.has("limit")) {
+    const raw = (url.searchParams.get("limit") || "").trim();
+    const parsed = parseInt(raw, 10);
+
+    if (Number.isFinite(parsed)) {
+      limit = clamp(parsed, 1, isClass ? 200 : 500);
+    }
+  }
 
   const baseSelect = `
     SELECT
@@ -47,8 +54,6 @@ export default async (req) => {
     FROM scores
   `;
 
-  // Pick best row per unique name first, then rank.
-  // DISTINCT ON needs ORDER BY: (key, score desc...)
   const rows = isClass
     ? await sqlQuery(
         `

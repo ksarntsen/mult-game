@@ -1,9 +1,13 @@
+```js
 import { ensureSchema, sqlQuery, jsonResponse, methodNotAllowed } from "./_db.js";
 
 // Behavior:
-// - With className: top 5 scores for that class, one per unique name (best score)
-// - Without className: global top 25, one per unique name (best score)
+// - With className: top N scores for that class, one per unique name (best score)
+// - Without className: global top N, one per unique name (best score)
 // NOTE: "Unique name" is case-insensitive.
+// Optional query param: ?limit=NUMBER
+// - Default: class=5, global=25
+// - Clamped: class 1..200, global 1..500
 
 export default async (req) => {
   if (req.method !== "GET") return methodNotAllowed();
@@ -13,6 +17,15 @@ export default async (req) => {
   const url = new URL(req.url);
   const className = (url.searchParams.get("className") || "").trim();
   const isClass = Boolean(className);
+
+  const limitParamRaw = url.searchParams.get("limit");
+  const limitParam = Number(limitParamRaw);
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+  const defaultLimit = isClass ? 5 : 25;
+  const limit = Number.isFinite(limitParam)
+    ? clamp(Math.floor(limitParam), isClass ? 1 : 1, isClass ? 200 : 500)
+    : defaultLimit;
 
   const baseSelect = `
     SELECT
@@ -67,9 +80,9 @@ export default async (req) => {
             ts
           FROM best
           ORDER BY points DESC, accuracy DESC, best_streak DESC, ts DESC
-          LIMIT 5;
+          LIMIT $2;
         `,
-        [className]
+        [className, limit]
       )
     : await sqlQuery(
         `
@@ -99,11 +112,12 @@ export default async (req) => {
             ts
           FROM best
           ORDER BY points DESC, accuracy DESC, best_streak DESC, ts DESC
-          LIMIT 25;
-        `
+          LIMIT $1;
+        `,
+        [limit]
       );
 
-  const out = rows.map(r => ({
+  const out = rows.map((r) => ({
     playerId: r.player_id,
     name: r.name,
     className: r.class_name,
@@ -118,8 +132,9 @@ export default async (req) => {
     reasonText: r.reason_text || "Tidligere runde",
     mistakes: r.mistakes ?? [],
     slowestCorrect: r.slowest_correct ?? [],
-    ts: Number(r.ts) || Date.now()
+    ts: Number(r.ts) || Date.now(),
   }));
 
   return jsonResponse(out);
 };
+```

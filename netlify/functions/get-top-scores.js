@@ -1,143 +1,528 @@
-import { ensureSchema, sqlQuery, jsonResponse, methodNotAllowed } from "./_db.js";
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>1-minuttsgangen</title>
+  <style>
+    :root{
+      --bg1:#ffb703;
+      --bg2:#fb8500;
+      --card:#fff7db;
+      --text:#2a1b00;
+      --muted:#6a4a00;
+      --border:rgba(42,27,0,.18);
+      --shadow:0 18px 50px rgba(60,30,0,.22);
+      --radius:18px;
+      --good:#1f8f3a;
+      --bad:#d62828;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
 
-// Behavior:
-// - With className: top N scores for that class, one per unique name (best score)
-// - Without className: global top N, one per unique name (best score)
-// NOTE: "Unique name" is case-insensitive.
-// Optional query param: ?limit=NUMBER
-// - Default: class=5, global=25
-// - Clamped: class 1..200, global 1..500
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1100px 700px at 15% 15%, rgba(255,214,10,.85), transparent 60%),
+        radial-gradient(1000px 650px at 85% 35%, rgba(251,133,0,.85), transparent 58%),
+        radial-gradient(900px 600px at 55% 95%, rgba(255,183,3,.92), transparent 62%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
 
-export default async (req) => {
-  if (req.method !== "GET") return methodNotAllowed();
+    .wrap{ width:min(1060px, 92vw); padding:24px; }
 
-  await ensureSchema();
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,247,219,.92));
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding:22px;
+      overflow:hidden;
+      position:relative;
+    }
 
-  const url = new URL(req.url);
-  const className = (url.searchParams.get("className") || "").trim();
-  const isClass = Boolean(className);
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-60px -60px auto auto;
+      width:220px;
+      height:220px;
+      border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,109,0,.35), rgba(255,109,0,0) 70%);
+      pointer-events:none;
+    }
 
-  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    .top{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      align-items:center;
+      justify-content:flex-start;
+      margin-bottom:14px;
+    }
 
-  const defaultLimit = isClass ? 5 : 25;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 240px;
+    }
 
-  let limit = defaultLimit;
+    .logo{
+      width:46px;
+      height:auto;
+      display:block;
+      filter:
+        drop-shadow(0 10px 18px rgba(60,30,0,.14))
+        drop-shadow(0 0 18px rgba(255,255,255,.35));
+      user-select:none;
+      -webkit-user-drag:none;
+    }
 
-  // IMPORTANT: only parse if the param exists
-  if (url.searchParams.has("limit")) {
-    const raw = (url.searchParams.get("limit") || "").trim();
-    const parsed = parseInt(raw, 10);
+    h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+      font-weight:950;
+    }
 
-    if (Number.isFinite(parsed)) {
-      limit = clamp(parsed, 1, isClass ? 200 : 500);
+    .content{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:18px;
+      margin-top:14px;
+    }
+
+    @media (max-width: 860px){
+      .content{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      border:1px solid rgba(42,27,0,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,247,219,.75));
+      border-radius: var(--radius);
+      padding:18px;
+      box-shadow: 0 16px 30px rgba(60,30,0,.10);
+      min-height: 320px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .panelHead{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .panelHead h2{
+      margin:0;
+      font-size:14px;
+      font-weight:1100;
+      letter-spacing:.2px;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .panelHead .meta{
+      margin:0;
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height: 520px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 26px 1fr auto;
+      gap:10px;
+      align-items:center;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid rgba(42,27,0,.12);
+      background: rgba(255,247,219,.62);
+      transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+    }
+
+    .row:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,109,0,.35);
+      box-shadow: 0 16px 26px rgba(60,30,0,.10);
+      background: rgba(255,247,219,.78);
+    }
+
+    .rank{
+      font-weight:1100;
+      color:var(--muted);
+      font-variant-numeric: tabular-nums;
+      text-align:center;
+    }
+
+    .metaCol{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+
+    .line1{
+      display:flex;
+      gap:8px;
+      align-items:baseline;
+      min-width:0;
+    }
+
+    .score{
+      font-weight:1200;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+    }
+
+    .date{
+      color:var(--muted);
+      font-weight:850;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .line2{
+      color:var(--muted);
+      font-weight:850;
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .badge{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(42,27,0,.14);
+      background: rgba(255,255,255,.75);
+      color:var(--muted);
+      font-weight:1100;
+      font-size:12px;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .empty{
+      color:var(--muted);
+      font-weight:900;
+      font-size:12px;
+      padding:8px 2px;
+    }
+
+    /* Class-only rows */
+    .row.classRow{
+      grid-template-columns: 26px 1fr auto;
+    }
+    .className{
+      font-weight:1200;
+      letter-spacing:.2px;
+    }
+    .classAvg{
+      font-weight:1200;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div class="brand">
+          <img class="logo" src="logo.png" alt="" />
+          <div>
+            <h1>1-minuttsgangen</h1>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="panel" aria-label="Global top 5">
+          <div class="panelHead">
+            <h2>Top 5 (alle)</h2>
+            <div class="meta" id="globalMeta"></div>
+          </div>
+          <div class="list" id="globalList"></div>
+          <div class="empty" id="globalEmpty" style="display:none;"></div>
+        </div>
+
+        <div class="panel" aria-label="Topp 3 klasser">
+          <div class="panelHead">
+            <h2>Topp 3 klasser</h2>
+            <div class="meta" id="classMeta"></div>
+          </div>
+          <div class="list" id="classList"></div>
+          <div class="empty" id="classEmpty" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // Expected Netlify functions (same origin):
+  // GET /.netlify/functions/get-top-scores
+  // GET /.netlify/functions/get-top-scores?className=8A&limit=50
+  //
+  // Class leaderboard rule:
+  // - Consider only classes with >= TOP_IN_CLASS registered names (unique names)
+  // - Score per class = average of points of the top TOP_IN_CLASS in the class
+  // - Display top 3 classes (class + average score)
+
+  const ALL_CLASSES = ["8A","8B","8C","8D","9A","9B","9C","9D","9E","10A","10B","10C","10D","10E"];
+  const TOP_GLOBAL = 5;
+  const TOP_CLASSES = 3;
+  const TOP_IN_CLASS = 8; // change this if you want 10, etc.
+
+  const globalListEl = document.getElementById("globalList");
+  const globalEmptyEl = document.getElementById("globalEmpty");
+  const globalMetaEl = document.getElementById("globalMeta");
+
+  const classListEl = document.getElementById("classList");
+  const classEmptyEl = document.getElementById("classEmpty");
+  const classMetaEl = document.getElementById("classMeta");
+
+  function pad2(n){ return String(n).padStart(2, "0"); }
+
+  function fmtDate(ts){
+    const d = new Date(Number(ts) || Date.now());
+    return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${String(d.getFullYear()).slice(-2)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  }
+
+  function normalizeEntry(e){
+    return {
+      ts: Number(e?.ts) || Date.now(),
+      points: Number(e?.points) || 0,
+      name: String(e?.name || "Ukjent"),
+      className: String(e?.className || ""),
+      correct: Number(e?.correct) || 0,
+      attempts: Number(e?.attempts) || 0,
+      accuracy: Number(e?.accuracy) || (e?.attempts ? Math.round((Number(e.correct)||0)/(Number(e.attempts)||1)*100) : 0),
+      bestStreak: Number(e?.bestStreak) || 0,
+      maxFactor: Number(e?.maxFactor) || 10
+    };
+  }
+
+  async function apiGetGlobalTopScores(){
+    const url = `/.netlify/functions/get-top-scores`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`get-top-scores (global) feilet (${res.status}): ${txt}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data.map(normalizeEntry) : [];
+  }
+
+  async function apiGetClassTopScores(className, limit){
+    const qs = new URLSearchParams();
+    qs.set("className", String(className || ""));
+    if (Number.isFinite(Number(limit)) && Number(limit) > 0) qs.set("limit", String(Number(limit)));
+
+    const url = `/.netlify/functions/get-top-scores?${qs.toString()}`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    if (!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`get-top-scores (class ${className}) feilet (${res.status}): ${txt}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data.map(normalizeEntry) : [];
+  }
+
+  function uniqByName(list){
+    const seen = new Set();
+    const out = [];
+    for (const e of (Array.isArray(list) ? list : [])){
+      const key = String(e?.name || "").trim().toLowerCase();
+      if (!key) continue;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(e);
+    }
+    return out;
+  }
+
+  function renderGlobalBoard(entries){
+    globalListEl.innerHTML = "";
+    globalEmptyEl.style.display = "none";
+
+    if (!entries || entries.length === 0){
+      globalEmptyEl.style.display = "block";
+      globalEmptyEl.textContent = "Ingen runder lagret ennå.";
+      globalMetaEl.textContent = "";
+      return;
+    }
+
+    globalMetaEl.textContent = `Viser topp ${Math.min(TOP_GLOBAL, entries.length)}`;
+
+    entries.slice(0, TOP_GLOBAL).forEach((e, idx) => {
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const rank = document.createElement("div");
+      rank.className = "rank";
+      rank.textContent = String(idx + 1);
+
+      const meta = document.createElement("div");
+      meta.className = "metaCol";
+
+      const line1 = document.createElement("div");
+      line1.className = "line1";
+
+      const score = document.createElement("div");
+      score.className = "score";
+      score.textContent = `${e.points}p`;
+
+      const date = document.createElement("div");
+      date.className = "date";
+      date.textContent = fmtDate(e.ts);
+
+      line1.appendChild(score);
+      line1.appendChild(date);
+
+      const line2 = document.createElement("div");
+      line2.className = "line2";
+      const who = [e.name, e.className].filter(Boolean).join(" • ") || "Ukjent";
+      line2.textContent = `${who} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
+
+      meta.appendChild(line1);
+      meta.appendChild(line2);
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+      badge.textContent = `#${idx + 1}`;
+
+      row.appendChild(rank);
+      row.appendChild(meta);
+      row.appendChild(badge);
+
+      globalListEl.appendChild(row);
+    });
+  }
+
+  function renderClassBoard(classStats){
+    classListEl.innerHTML = "";
+    classEmptyEl.style.display = "none";
+
+    if (!classStats || classStats.length === 0){
+      classEmptyEl.style.display = "block";
+      classEmptyEl.textContent = `Ingen klasser har minst ${TOP_IN_CLASS} navn.`;
+      classMetaEl.textContent = "";
+      return;
+    }
+
+    classMetaEl.textContent = `Snitt av topp ${TOP_IN_CLASS}`;
+
+    classStats.slice(0, TOP_CLASSES).forEach((c, idx) => {
+      const row = document.createElement("div");
+      row.className = "row classRow";
+
+      const rank = document.createElement("div");
+      rank.className = "rank";
+      rank.textContent = String(idx + 1);
+
+      const cls = document.createElement("div");
+      cls.className = "className";
+      cls.textContent = c.className;
+
+      const avg = document.createElement("div");
+      avg.className = "classAvg badge";
+      avg.textContent = `${c.avg.toFixed(1)}p`;
+
+      row.appendChild(rank);
+      row.appendChild(cls);
+      row.appendChild(avg);
+
+      classListEl.appendChild(row);
+    });
+  }
+
+  function computeAvgTopN(pointsList){
+    const top = pointsList.slice(0, TOP_IN_CLASS);
+    if (top.length < TOP_IN_CLASS) return null;
+    const sum = top.reduce((acc, e) => acc + (Number(e?.points) || 0), 0);
+    return sum / TOP_IN_CLASS;
+  }
+
+  async function computeTopClasses(){
+    const jobs = ALL_CLASSES.map(async (cls) => {
+      try{
+        // Request enough to still have >= TOP_IN_CLASS after dedupe
+        const listRaw = await apiGetClassTopScores(cls, 80);
+
+        // Enforce sort desc
+        listRaw.sort((a, b) => (Number(b.points)||0) - (Number(a.points)||0));
+
+        // Unique names
+        const unique = uniqByName(listRaw);
+        unique.sort((a, b) => (Number(b.points)||0) - (Number(a.points)||0));
+
+        if (unique.length < TOP_IN_CLASS) return null;
+
+        const avg = computeAvgTopN(unique);
+        if (avg === null) return null;
+
+        return { className: cls, avg };
+      }catch{
+        return null;
+      }
+    });
+
+    const results = (await Promise.all(jobs)).filter(Boolean);
+    results.sort((a, b) => b.avg - a.avg);
+    return results.slice(0, TOP_CLASSES);
+  }
+
+  async function loadAll(){
+    try{
+      globalListEl.innerHTML = "";
+      globalEmptyEl.style.display = "none";
+      globalEmptyEl.textContent = "";
+      globalMetaEl.textContent = "";
+
+      classListEl.innerHTML = "";
+      classEmptyEl.style.display = "none";
+      classEmptyEl.textContent = "";
+      classMetaEl.textContent = "";
+
+      const global = await apiGetGlobalTopScores();
+      renderGlobalBoard(global);
+
+      const topClasses = await computeTopClasses();
+      renderClassBoard(topClasses);
+    }catch(e){
+      console.warn(e);
+
+      globalEmptyEl.style.display = "block";
+      globalEmptyEl.textContent = "Får ikke kontakt med serveren.";
+
+      classEmptyEl.style.display = "block";
+      classEmptyEl.textContent = "Får ikke kontakt med serveren.";
     }
   }
 
-  const baseSelect = `
-    SELECT
-      player_id,
-      name,
-      class_name,
-      points,
-      attempts,
-      correct,
-      accuracy,
-      best_streak,
-      max_factor,
-      elapsed_sec,
-      avg_sec,
-      reason_text,
-      mistakes,
-      slowest_correct,
-      (EXTRACT(EPOCH FROM created_at) * 1000)::bigint AS ts,
-      created_at
-    FROM scores
-  `;
-
-  const rows = isClass
-    ? await sqlQuery(
-        `
-          WITH best AS (
-            SELECT DISTINCT ON (LOWER(name))
-              *
-            FROM (
-              ${baseSelect}
-              WHERE class_name = $1
-            ) s
-            ORDER BY LOWER(name), points DESC, accuracy DESC, best_streak DESC, created_at DESC
-          )
-          SELECT
-            player_id,
-            name,
-            class_name,
-            points,
-            attempts,
-            correct,
-            accuracy,
-            best_streak,
-            max_factor,
-            elapsed_sec,
-            avg_sec,
-            reason_text,
-            mistakes,
-            slowest_correct,
-            ts
-          FROM best
-          ORDER BY points DESC, accuracy DESC, best_streak DESC, ts DESC
-          LIMIT $2;
-        `,
-        [className, limit]
-      )
-    : await sqlQuery(
-        `
-          WITH best AS (
-            SELECT DISTINCT ON (LOWER(name))
-              *
-            FROM (
-              ${baseSelect}
-            ) s
-            ORDER BY LOWER(name), points DESC, accuracy DESC, best_streak DESC, created_at DESC
-          )
-          SELECT
-            player_id,
-            name,
-            class_name,
-            points,
-            attempts,
-            correct,
-            accuracy,
-            best_streak,
-            max_factor,
-            elapsed_sec,
-            avg_sec,
-            reason_text,
-            mistakes,
-            slowest_correct,
-            ts
-          FROM best
-          ORDER BY points DESC, accuracy DESC, best_streak DESC, ts DESC
-          LIMIT $1;
-        `,
-        [limit]
-      );
-
-  const out = rows.map((r) => ({
-    playerId: r.player_id,
-    name: r.name,
-    className: r.class_name,
-    points: Number(r.points) || 0,
-    attempts: Number(r.attempts) || 0,
-    correct: Number(r.correct) || 0,
-    accuracy: Number(r.accuracy) || 0,
-    bestStreak: Number(r.best_streak) || 0,
-    maxFactor: Number(r.max_factor) || 10,
-    elapsedSec: Number(r.elapsed_sec) || 0,
-    avgSec: Number(r.avg_sec) || 0,
-    reasonText: r.reason_text || "Tidligere runde",
-    mistakes: r.mistakes ?? [],
-    slowestCorrect: r.slowest_correct ?? [],
-    ts: Number(r.ts) || Date.now(),
-  }));
-
-  return jsonResponse(out);
-};
+  loadAll();
+})();
+</script>
+</body>
+</html>

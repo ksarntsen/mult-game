@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Highscore – oversikt</title>
+  <title>1-minuttsgangen</title>
   <style>
     :root{
       --bg1:#ffb703;
@@ -62,7 +62,7 @@
       flex-wrap:wrap;
       gap:14px;
       align-items:center;
-      justify-content:space-between;
+      justify-content:flex-start;
       margin-bottom:14px;
     }
 
@@ -91,62 +91,6 @@
       font-weight:950;
     }
 
-    .sub{
-      margin:4px 0 0 0;
-      color:var(--muted);
-      font-size:13px;
-      font-weight:800;
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    button{
-      border:2px solid rgba(42,27,0,.16);
-      background: rgba(255,255,255,.85);
-      color: var(--text);
-      border-radius:999px;
-      padding:10px 12px;
-      font-size:13px;
-      font-weight:950;
-      cursor:pointer;
-      transition: transform .05s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
-      box-shadow: 0 12px 22px rgba(60,30,0,.10);
-    }
-
-    button:hover{
-      background: rgba(255,255,255,.95);
-      border-color: rgba(255,109,0,.45);
-      box-shadow: 0 18px 28px rgba(255,109,0,.18);
-    }
-
-    button:active{ transform: translateY(1px); }
-
-    .pill{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(42,27,0,.18);
-      background: rgba(255,255,255,.75);
-      color:var(--muted);
-      font-size:13px;
-      min-width:180px;
-      justify-content:center;
-      box-shadow: 0 10px 20px rgba(60,30,0,.08);
-      font-weight:900;
-    }
-    .pill strong{
-      color:var(--text);
-      font-weight:1100;
-      font-variant-numeric: tabular-nums;
-    }
-
     .content{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -156,7 +100,6 @@
 
     @media (max-width: 860px){
       .content{ grid-template-columns: 1fr; }
-      .pill{ min-width: 160px; }
     }
 
     .panel{
@@ -286,9 +229,6 @@
       padding:8px 2px;
     }
 
-    .good{ color: var(--good); font-weight:1100; }
-    .bad{ color: var(--bad); font-weight:1100; }
-
     /* Class-only rows */
     .row.classRow{
       grid-template-columns: 26px 1fr auto;
@@ -311,14 +251,8 @@
         <div class="brand">
           <img class="logo" src="logo.png" alt="" />
           <div>
-            <h1>Highscore – oversikt</h1>
-            <div class="sub">Top 5 globalt + topp 3 klasser (snitt av topp 10, min. 10 navn)</div>
+            <h1>1-minuttsgangen</h1>
           </div>
-        </div>
-
-        <div class="actions">
-          <div class="pill">Status: <strong id="status">Laster…</strong></div>
-          <button id="refreshBtn" type="button">Oppdater</button>
         </div>
       </div>
 
@@ -348,20 +282,17 @@
 (() => {
   // Expected Netlify functions (same origin):
   // GET /.netlify/functions/get-top-scores
-  // GET /.netlify/functions/get-top-scores?className=8A[&limit=50]
+  // GET /.netlify/functions/get-top-scores?className=8A&limit=50
   //
   // Class leaderboard rule:
-  // - Consider only classes with >= 10 registered names (unique names returned or deduped client-side)
-  // - Score per class = average of points of the top 10 in the class
+  // - Consider only classes with >= TOP_IN_CLASS registered names (unique names)
+  // - Score per class = average of points of the top TOP_IN_CLASS in the class
   // - Display top 3 classes (class + average score)
 
   const ALL_CLASSES = ["8A","8B","8C","8D","9A","9B","9C","9D","9E","10A","10B","10C","10D","10E"];
   const TOP_GLOBAL = 5;
   const TOP_CLASSES = 3;
-  const TOP_IN_CLASS = 8;
-
-  const statusEl = document.getElementById("status");
-  const refreshBtn = document.getElementById("refreshBtn");
+  const TOP_IN_CLASS = 8; // change this if you want 10, etc.
 
   const globalListEl = document.getElementById("globalList");
   const globalEmptyEl = document.getElementById("globalEmpty");
@@ -416,13 +347,6 @@
     }
     const data = await res.json();
     return Array.isArray(data) ? data.map(normalizeEntry) : [];
-  }
-
-  function setStatus(text, kind){
-    statusEl.textContent = text;
-    statusEl.className = "";
-    if (kind === "good") statusEl.classList.add("good");
-    if (kind === "bad") statusEl.classList.add("bad");
   }
 
   function uniqByName(list){
@@ -533,7 +457,7 @@
     });
   }
 
-  function computeAvgTop10(pointsList){
+  function computeAvgTopN(pointsList){
     const top = pointsList.slice(0, TOP_IN_CLASS);
     if (top.length < TOP_IN_CLASS) return null;
     const sum = top.reduce((acc, e) => acc + (Number(e?.points) || 0), 0);
@@ -543,19 +467,19 @@
   async function computeTopClasses(){
     const jobs = ALL_CLASSES.map(async (cls) => {
       try{
-        // Ask for more than 10 so we can dedupe by name safely and still keep >=10
-        const listRaw = await apiGetClassTopScores(cls, 50);
+        // Request enough to still have >= TOP_IN_CLASS after dedupe
+        const listRaw = await apiGetClassTopScores(cls, 80);
 
-        // Sort by points desc (server should, but enforce)
+        // Enforce sort desc
         listRaw.sort((a, b) => (Number(b.points)||0) - (Number(a.points)||0));
 
-        // Ensure at least 10 unique names
+        // Unique names
         const unique = uniqByName(listRaw);
         unique.sort((a, b) => (Number(b.points)||0) - (Number(a.points)||0));
 
         if (unique.length < TOP_IN_CLASS) return null;
 
-        const avg = computeAvgTop10(unique);
+        const avg = computeAvgTopN(unique);
         if (avg === null) return null;
 
         return { className: cls, avg };
@@ -570,30 +494,24 @@
   }
 
   async function loadAll(){
-    setStatus("Laster…");
-
-    globalListEl.innerHTML = "";
-    globalEmptyEl.style.display = "none";
-    globalEmptyEl.textContent = "";
-
-    classListEl.innerHTML = "";
-    classEmptyEl.style.display = "none";
-    classEmptyEl.textContent = "";
-
-    globalMetaEl.textContent = "";
-    classMetaEl.textContent = "";
-
     try{
+      globalListEl.innerHTML = "";
+      globalEmptyEl.style.display = "none";
+      globalEmptyEl.textContent = "";
+      globalMetaEl.textContent = "";
+
+      classListEl.innerHTML = "";
+      classEmptyEl.style.display = "none";
+      classEmptyEl.textContent = "";
+      classMetaEl.textContent = "";
+
       const global = await apiGetGlobalTopScores();
       renderGlobalBoard(global);
 
       const topClasses = await computeTopClasses();
       renderClassBoard(topClasses);
-
-      setStatus("OK", "good");
     }catch(e){
       console.warn(e);
-      setStatus("Feil", "bad");
 
       globalEmptyEl.style.display = "block";
       globalEmptyEl.textContent = "Får ikke kontakt med serveren.";
@@ -602,8 +520,6 @@
       classEmptyEl.textContent = "Får ikke kontakt med serveren.";
     }
   }
-
-  refreshBtn.addEventListener("click", loadAll);
 
   loadAll();
 })();

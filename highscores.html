@@ -66,6 +66,24 @@
       margin-bottom:14px;
     }
 
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 240px;
+    }
+
+    .logo{
+      width:46px;
+      height:auto;
+      display:block;
+      filter:
+        drop-shadow(0 10px 18px rgba(60,30,0,.14))
+        drop-shadow(0 0 18px rgba(255,255,255,.35));
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
     h1{
       margin:0;
       font-size:22px;
@@ -270,15 +288,32 @@
 
     .good{ color: var(--good); font-weight:1100; }
     .bad{ color: var(--bad); font-weight:1100; }
+
+    /* Class-only rows */
+    .row.classRow{
+      grid-template-columns: 26px 1fr auto;
+    }
+    .className{
+      font-weight:1200;
+      letter-spacing:.2px;
+    }
+    .classAvg{
+      font-weight:1200;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
       <div class="top">
-        <div>
-          <h1>Highscore – oversikt</h1>
-          <div class="sub">Top 5 globalt + beste klasse (snitt av topp 10, viser topp 3)</div>
+        <div class="brand">
+          <img class="logo" src="logo.png" alt="" />
+          <div>
+            <h1>Highscore – oversikt</h1>
+            <div class="sub">Top 5 globalt + topp 3 klasser (snitt av topp 10, min. 10 navn)</div>
+          </div>
         </div>
 
         <div class="actions">
@@ -297,13 +332,13 @@
           <div class="empty" id="globalEmpty" style="display:none;"></div>
         </div>
 
-        <div class="panel" aria-label="Beste klasse">
+        <div class="panel" aria-label="Topp 3 klasser">
           <div class="panelHead">
-            <h2>Beste klasse</h2>
-            <div class="meta" id="bestMeta"></div>
+            <h2>Topp 3 klasser</h2>
+            <div class="meta" id="classMeta"></div>
           </div>
-          <div class="list" id="bestList"></div>
-          <div class="empty" id="bestEmpty" style="display:none;"></div>
+          <div class="list" id="classList"></div>
+          <div class="empty" id="classEmpty" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -312,13 +347,18 @@
 <script>
 (() => {
   // Expected Netlify functions (same origin):
-  // 1) GET /.netlify/functions/get-top-scores            -> global top list (usually unique names)
-  // 2) GET /.netlify/functions/get-top-scores?className=8A[&limit=10] -> per-class top list
+  // GET /.netlify/functions/get-top-scores
+  // GET /.netlify/functions/get-top-scores?className=8A[&limit=50]
   //
-  // This page calculates best class by average points of the 10 best in the class.
-  // If API returns fewer than 10, it uses what's available and reports count.
+  // Class leaderboard rule:
+  // - Consider only classes with >= 10 registered names (unique names returned or deduped client-side)
+  // - Score per class = average of points of the top 10 in the class
+  // - Display top 3 classes (class + average score)
 
   const ALL_CLASSES = ["8A","8B","8C","8D","9A","9B","9C","9D","9E","10A","10B","10C","10D","10E"];
+  const TOP_GLOBAL = 5;
+  const TOP_CLASSES = 3;
+  const TOP_IN_CLASS = 10;
 
   const statusEl = document.getElementById("status");
   const refreshBtn = document.getElementById("refreshBtn");
@@ -327,9 +367,9 @@
   const globalEmptyEl = document.getElementById("globalEmpty");
   const globalMetaEl = document.getElementById("globalMeta");
 
-  const bestListEl = document.getElementById("bestList");
-  const bestEmptyEl = document.getElementById("bestEmpty");
-  const bestMetaEl = document.getElementById("bestMeta");
+  const classListEl = document.getElementById("classList");
+  const classEmptyEl = document.getElementById("classEmpty");
+  const classMetaEl = document.getElementById("classMeta");
 
   function pad2(n){ return String(n).padStart(2, "0"); }
 
@@ -364,7 +404,6 @@
   }
 
   async function apiGetClassTopScores(className, limit){
-    // limit is optional; if function ignores it, result size will be whatever server returns
     const qs = new URLSearchParams();
     qs.set("className", String(className || ""));
     if (Number.isFinite(Number(limit)) && Number(limit) > 0) qs.set("limit", String(Number(limit)));
@@ -386,27 +425,33 @@
     if (kind === "bad") statusEl.classList.add("bad");
   }
 
-  function clearBoard(listEl, emptyEl, emptyText){
-    listEl.innerHTML = "";
-    emptyEl.style.display = "none";
-    emptyEl.textContent = emptyText || "";
+  function uniqByName(list){
+    const seen = new Set();
+    const out = [];
+    for (const e of (Array.isArray(list) ? list : [])){
+      const key = String(e?.name || "").trim().toLowerCase();
+      if (!key) continue;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(e);
+    }
+    return out;
   }
 
-  function renderBoard(listEl, emptyEl, entries, opts){
-    const titleMode = String(opts?.mode || "global");
-    const maxRows = Number(opts?.maxRows || 5);
-
-    listEl.innerHTML = "";
+  function renderGlobalBoard(entries){
+    globalListEl.innerHTML = "";
+    globalEmptyEl.style.display = "none";
 
     if (!entries || entries.length === 0){
-      emptyEl.style.display = "block";
-      emptyEl.textContent = "Ingen runder lagret ennå.";
+      globalEmptyEl.style.display = "block";
+      globalEmptyEl.textContent = "Ingen runder lagret ennå.";
+      globalMetaEl.textContent = "";
       return;
     }
 
-    emptyEl.style.display = "none";
+    globalMetaEl.textContent = `Viser topp ${Math.min(TOP_GLOBAL, entries.length)}`;
 
-    entries.slice(0, maxRows).forEach((e, idx) => {
+    entries.slice(0, TOP_GLOBAL).forEach((e, idx) => {
       const row = document.createElement("div");
       row.className = "row";
 
@@ -433,13 +478,8 @@
 
       const line2 = document.createElement("div");
       line2.className = "line2";
-
-      if (titleMode === "global"){
-        const who = [e.name, e.className].filter(Boolean).join(" • ") || "Ukjent";
-        line2.textContent = `${who} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
-      } else {
-        line2.textContent = `${e.name || "Ukjent"} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
-      }
+      const who = [e.name, e.className].filter(Boolean).join(" • ") || "Ukjent";
+      line2.textContent = `${who} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
 
       meta.appendChild(line1);
       meta.appendChild(line2);
@@ -452,67 +492,103 @@
       row.appendChild(meta);
       row.appendChild(badge);
 
-      listEl.appendChild(row);
+      globalListEl.appendChild(row);
     });
   }
 
-  function avgPointsTopN(list, n){
-    const arr = (Array.isArray(list) ? list : []).slice(0, n);
-    if (arr.length === 0) return { avg: 0, count: 0 };
-    const sum = arr.reduce((acc, e) => acc + (Number(e?.points) || 0), 0);
-    return { avg: sum / arr.length, count: arr.length };
+  function renderClassBoard(classStats){
+    classListEl.innerHTML = "";
+    classEmptyEl.style.display = "none";
+
+    if (!classStats || classStats.length === 0){
+      classEmptyEl.style.display = "block";
+      classEmptyEl.textContent = `Ingen klasser har minst ${TOP_IN_CLASS} navn.`;
+      classMetaEl.textContent = "";
+      return;
+    }
+
+    classMetaEl.textContent = `Snitt av topp ${TOP_IN_CLASS}`;
+
+    classStats.slice(0, TOP_CLASSES).forEach((c, idx) => {
+      const row = document.createElement("div");
+      row.className = "row classRow";
+
+      const rank = document.createElement("div");
+      rank.className = "rank";
+      rank.textContent = String(idx + 1);
+
+      const cls = document.createElement("div");
+      cls.className = "className";
+      cls.textContent = c.className;
+
+      const avg = document.createElement("div");
+      avg.className = "classAvg badge";
+      avg.textContent = `${c.avg.toFixed(1)}p`;
+
+      row.appendChild(rank);
+      row.appendChild(cls);
+      row.appendChild(avg);
+
+      classListEl.appendChild(row);
+    });
   }
 
-  async function computeBestClass(){
-    // Fetch each class top list (try limit 10)
+  function computeAvgTop10(pointsList){
+    const top = pointsList.slice(0, TOP_IN_CLASS);
+    if (top.length < TOP_IN_CLASS) return null;
+    const sum = top.reduce((acc, e) => acc + (Number(e?.points) || 0), 0);
+    return sum / TOP_IN_CLASS;
+  }
+
+  async function computeTopClasses(){
     const jobs = ALL_CLASSES.map(async (cls) => {
       try{
-        const list = await apiGetClassTopScores(cls, 10);
-        const { avg, count } = avgPointsTopN(list, 10);
-        return { className: cls, avg, count, list };
+        // Ask for more than 10 so we can dedupe by name safely and still keep >=10
+        const listRaw = await apiGetClassTopScores(cls, 50);
+
+        // Sort by points desc (server should, but enforce)
+        listRaw.sort((a, b) => (Number(b.points)||0) - (Number(a.points)||0));
+
+        // Ensure at least 10 unique names
+        const unique = uniqByName(listRaw);
+        unique.sort((a, b) => (Number(b.points)||0) - (Number(a.points)||0));
+
+        if (unique.length < TOP_IN_CLASS) return null;
+
+        const avg = computeAvgTop10(unique);
+        if (avg === null) return null;
+
+        return { className: cls, avg };
       }catch{
-        return { className: cls, avg: -1, count: 0, list: [] };
+        return null;
       }
     });
 
-    const results = await Promise.all(jobs);
-
-    const valid = results.filter(r => r.avg >= 0 && r.count > 0);
-    if (valid.length === 0) return null;
-
-    valid.sort((a, b) => b.avg - a.avg);
-    return valid[0];
+    const results = (await Promise.all(jobs)).filter(Boolean);
+    results.sort((a, b) => b.avg - a.avg);
+    return results.slice(0, TOP_CLASSES);
   }
 
   async function loadAll(){
     setStatus("Laster…");
 
-    clearBoard(globalListEl, globalEmptyEl, "");
-    clearBoard(bestListEl, bestEmptyEl, "");
+    globalListEl.innerHTML = "";
+    globalEmptyEl.style.display = "none";
+    globalEmptyEl.textContent = "";
+
+    classListEl.innerHTML = "";
+    classEmptyEl.style.display = "none";
+    classEmptyEl.textContent = "";
 
     globalMetaEl.textContent = "";
-    bestMetaEl.textContent = "";
+    classMetaEl.textContent = "";
 
     try{
       const global = await apiGetGlobalTopScores();
-      renderBoard(globalListEl, globalEmptyEl, global, { maxRows: 5, mode: "global" });
+      renderGlobalBoard(global);
 
-      globalMetaEl.textContent = `Viser topp 5 (av ${global.length})`;
-
-      const best = await computeBestClass();
-      if (!best){
-        bestEmptyEl.style.display = "block";
-        bestEmptyEl.textContent = "Fant ingen klasse-data.";
-        bestMetaEl.textContent = "";
-        setStatus("OK", "good");
-        return;
-      }
-
-      const top3 = best.list.slice(0, 3);
-      renderBoard(bestListEl, bestEmptyEl, top3, { maxRows: 3, mode: "class" });
-
-      const avgRounded = Math.round(best.avg * 10) / 10;
-      bestMetaEl.textContent = `${best.className} • snitt ${avgRounded}p (topp ${best.count}/10) • viser topp 3`;
+      const topClasses = await computeTopClasses();
+      renderClassBoard(topClasses);
 
       setStatus("OK", "good");
     }catch(e){
@@ -522,8 +598,8 @@
       globalEmptyEl.style.display = "block";
       globalEmptyEl.textContent = "Får ikke kontakt med serveren.";
 
-      bestEmptyEl.style.display = "block";
-      bestEmptyEl.textContent = "Får ikke kontakt med serveren.";
+      classEmptyEl.style.display = "block";
+      classEmptyEl.textContent = "Får ikke kontakt med serveren.";
     }
   }
 

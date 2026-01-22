@@ -88,7 +88,7 @@
       margin:0;
       font-size:22px;
       letter-spacing:.2px;
-      font-weight:950;
+      font-weight:900;
     }
 
     .content{
@@ -125,7 +125,7 @@
     .panelHead h2{
       margin:0;
       font-size:14px;
-      font-weight:1100;
+      font-weight:900;
       letter-spacing:.2px;
       text-transform:uppercase;
       color:var(--muted);
@@ -134,7 +134,7 @@
     .panelHead .meta{
       margin:0;
       font-size:12px;
-      font-weight:900;
+      font-weight:800;
       color:var(--muted);
       white-space:nowrap;
     }
@@ -168,7 +168,7 @@
     }
 
     .rank{
-      font-weight:1100;
+      font-weight:800;
       color:var(--muted);
       font-variant-numeric: tabular-nums;
       text-align:center;
@@ -189,21 +189,21 @@
     }
 
     .score{
-      font-weight:1200;
+      font-weight:900;
       font-variant-numeric: tabular-nums;
       white-space:nowrap;
     }
 
     .date{
       color:var(--muted);
-      font-weight:850;
+      font-weight:800;
       font-size:12px;
       white-space:nowrap;
     }
 
     .line2{
       color:var(--muted);
-      font-weight:850;
+      font-weight:800;
       font-size:12px;
       white-space:nowrap;
       overflow:hidden;
@@ -216,7 +216,7 @@
       border:1px solid rgba(42,27,0,.14);
       background: rgba(255,255,255,.75);
       color:var(--muted);
-      font-weight:1100;
+      font-weight:900;
       font-size:12px;
       white-space:nowrap;
       font-variant-numeric: tabular-nums;
@@ -224,23 +224,39 @@
 
     .empty{
       color:var(--muted);
-      font-weight:900;
+      font-weight:800;
       font-size:12px;
       padding:8px 2px;
     }
 
-    /* Class-only rows */
     .row.classRow{
       grid-template-columns: 26px 1fr auto;
     }
     .className{
-      font-weight:1200;
+      font-weight:900;
       letter-spacing:.2px;
     }
     .classAvg{
-      font-weight:1200;
+      font-weight:900;
       font-variant-numeric: tabular-nums;
       white-space:nowrap;
+    }
+
+    /* On-screen error box for TVs with no console */
+    .tvError{
+      position:fixed;
+      left:10px;
+      right:10px;
+      bottom:10px;
+      max-height:40vh;
+      overflow:auto;
+      background:#fff7db;
+      border:2px solid #d62828;
+      padding:10px;
+      z-index:99999;
+      font:12px/1.3 monospace;
+      white-space:pre-wrap;
+      display:none;
     }
   </style>
 </head>
@@ -278,88 +294,156 @@
     </div>
   </div>
 
+  <pre class="tvError" id="tvError"></pre>
+
 <script>
-(() => {
-  // Expected Netlify functions (same origin):
-  // GET /.netlify/functions/get-top-scores
-  // GET /.netlify/functions/get-top-scores?className=8A&limit=50
-  //
-  // Class leaderboard rule:
-  // - Consider only classes with >= TOP_IN_CLASS registered names (unique names)
-  // - Score per class = average of points of the top TOP_IN_CLASS in the class
-  // - Display top 3 classes (class + average score)
+/*
+  Fix for TV browsers:
+  - No optional chaining (?.)
+  - No arrow functions
+  - No async/await
+  - No fetch()
+  - No URLSearchParams
+  Use XMLHttpRequest + ES5-compatible syntax.
+*/
+(function(){
+  var ALL_CLASSES = ["8A","8B","8C","8D","9A","9B","9C","9D","9E","10A","10B","10C","10D","10E"];
+  var TOP_GLOBAL = 5;
+  var TOP_CLASSES = 3;
+  var TOP_IN_CLASS = 8;
 
-  const ALL_CLASSES = ["8A","8B","8C","8D","9A","9B","9C","9D","9E","10A","10B","10C","10D","10E"];
-  const TOP_GLOBAL = 5;
-  const TOP_CLASSES = 3;
-  const TOP_IN_CLASS = 8; // change this if you want 10, etc.
+  var globalListEl = document.getElementById("globalList");
+  var globalEmptyEl = document.getElementById("globalEmpty");
+  var globalMetaEl = document.getElementById("globalMeta");
 
-  const globalListEl = document.getElementById("globalList");
-  const globalEmptyEl = document.getElementById("globalEmpty");
-  const globalMetaEl = document.getElementById("globalMeta");
+  var classListEl = document.getElementById("classList");
+  var classEmptyEl = document.getElementById("classEmpty");
+  var classMetaEl = document.getElementById("classMeta");
 
-  const classListEl = document.getElementById("classList");
-  const classEmptyEl = document.getElementById("classEmpty");
-  const classMetaEl = document.getElementById("classMeta");
+  var tvErrorEl = document.getElementById("tvError");
 
-  function pad2(n){ return String(n).padStart(2, "0"); }
+  function showError(msg){
+    if (!tvErrorEl) return;
+    tvErrorEl.style.display = "block";
+    tvErrorEl.textContent = String(msg || "Ukjent feil");
+  }
+
+  window.onerror = function(message, source, lineno, colno, error){
+    var stack = (error && error.stack) ? error.stack : "";
+    showError("JS ERROR:\n" + message + "\n" + (source || "") + ":" + lineno + ":" + colno + "\n" + stack);
+  };
+
+  function pad2(n){ n = Number(n)||0; return (n < 10 ? "0" : "") + n; }
 
   function fmtDate(ts){
-    const d = new Date(Number(ts) || Date.now());
-    return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${String(d.getFullYear()).slice(-2)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    var d = new Date(Number(ts) || (new Date()).getTime());
+    return pad2(d.getDate()) + "." + pad2(d.getMonth()+1) + "." + String(d.getFullYear()).slice(-2) +
+           " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
   }
 
   function normalizeEntry(e){
+    e = e || {};
+    var ts = Number(e.ts); if (!isFinite(ts)) ts = (new Date()).getTime();
+    var points = Number(e.points); if (!isFinite(points)) points = 0;
+
+    var name = (e.name !== undefined && e.name !== null) ? String(e.name) : "Ukjent";
+    var className = (e.className !== undefined && e.className !== null) ? String(e.className) : "";
+
+    var correct = Number(e.correct); if (!isFinite(correct)) correct = 0;
+    var attempts = Number(e.attempts); if (!isFinite(attempts)) attempts = 0;
+
+    var accuracy;
+    if (e.accuracy !== undefined && e.accuracy !== null){
+      accuracy = Number(e.accuracy);
+      if (!isFinite(accuracy)) accuracy = 0;
+    } else {
+      accuracy = attempts ? Math.round((correct / (attempts || 1)) * 100) : 0;
+    }
+
+    var bestStreak = Number(e.bestStreak); if (!isFinite(bestStreak)) bestStreak = 0;
+    var maxFactor = Number(e.maxFactor); if (!isFinite(maxFactor)) maxFactor = 10;
+
     return {
-      ts: Number(e?.ts) || Date.now(),
-      points: Number(e?.points) || 0,
-      name: String(e?.name || "Ukjent"),
-      className: String(e?.className || ""),
-      correct: Number(e?.correct) || 0,
-      attempts: Number(e?.attempts) || 0,
-      accuracy: Number(e?.accuracy) || (e?.attempts ? Math.round((Number(e.correct)||0)/(Number(e.attempts)||1)*100) : 0),
-      bestStreak: Number(e?.bestStreak) || 0,
-      maxFactor: Number(e?.maxFactor) || 10
+      ts: ts,
+      points: points,
+      name: name,
+      className: className,
+      correct: correct,
+      attempts: attempts,
+      accuracy: accuracy,
+      bestStreak: bestStreak,
+      maxFactor: maxFactor
     };
   }
 
-  async function apiGetGlobalTopScores(){
-    const url = `/.netlify/functions/get-top-scores`;
-    const res = await fetch(url, { headers: { "Accept": "application/json" } });
-    if (!res.ok){
-      const txt = await res.text().catch(() => "");
-      throw new Error(`get-top-scores (global) feilet (${res.status}): ${txt}`);
+  function httpGetJson(url, onOk, onErr){
+    try{
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url, true);
+      xhr.setRequestHeader("Accept", "application/json");
+      xhr.onreadystatechange = function(){
+        if (xhr.readyState !== 4) return;
+        if (xhr.status >= 200 && xhr.status < 300){
+          try{
+            var data = JSON.parse(xhr.responseText || "null");
+            onOk(data);
+          }catch(parseErr){
+            onErr("JSON parse-feil: " + parseErr);
+          }
+        } else {
+          onErr("HTTP " + xhr.status + ": " + (xhr.responseText || ""));
+        }
+      };
+      xhr.onerror = function(){
+        onErr("Nettverksfeil (XHR)");
+      };
+      xhr.send(null);
+    }catch(e){
+      onErr("XHR-feil: " + e);
     }
-    const data = await res.json();
-    return Array.isArray(data) ? data.map(normalizeEntry) : [];
   }
 
-  async function apiGetClassTopScores(className, limit){
-    const qs = new URLSearchParams();
-    qs.set("className", String(className || ""));
-    if (Number.isFinite(Number(limit)) && Number(limit) > 0) qs.set("limit", String(Number(limit)));
+  function apiGetGlobalTopScores(cbOk, cbErr){
+    httpGetJson("/.netlify/functions/get-top-scores", function(data){
+      var arr = (Object.prototype.toString.call(data) === "[object Array]") ? data : [];
+      for (var i=0;i<arr.length;i++) arr[i] = normalizeEntry(arr[i]);
+      cbOk(arr);
+    }, cbErr);
+  }
 
-    const url = `/.netlify/functions/get-top-scores?${qs.toString()}`;
-    const res = await fetch(url, { headers: { "Accept": "application/json" } });
-    if (!res.ok){
-      const txt = await res.text().catch(() => "");
-      throw new Error(`get-top-scores (class ${className}) feilet (${res.status}): ${txt}`);
+  function apiGetClassTopScores(className, limit, cbOk, cbErr){
+    var url = "/.netlify/functions/get-top-scores?className=" + encodeURIComponent(String(className||""));
+    if (limit && isFinite(Number(limit)) && Number(limit) > 0){
+      url += "&limit=" + encodeURIComponent(String(Number(limit)));
     }
-    const data = await res.json();
-    return Array.isArray(data) ? data.map(normalizeEntry) : [];
+    httpGetJson(url, function(data){
+      var arr = (Object.prototype.toString.call(data) === "[object Array]") ? data : [];
+      for (var i=0;i<arr.length;i++) arr[i] = normalizeEntry(arr[i]);
+      cbOk(arr);
+    }, cbErr);
   }
 
   function uniqByName(list){
-    const seen = new Set();
-    const out = [];
-    for (const e of (Array.isArray(list) ? list : [])){
-      const key = String(e?.name || "").trim().toLowerCase();
+    var seen = {};
+    var out = [];
+    list = list || [];
+    for (var i=0;i<list.length;i++){
+      var e = list[i] || {};
+      var key = String(e.name || "").replace(/^\s+|\s+$/g,"").toLowerCase();
       if (!key) continue;
-      if (seen.has(key)) continue;
-      seen.add(key);
+      if (seen[key]) continue;
+      seen[key] = true;
       out.push(e);
     }
     return out;
+  }
+
+  function sortByPointsDesc(list){
+    list.sort(function(a,b){
+      var ap = Number(a && a.points) || 0;
+      var bp = Number(b && b.points) || 0;
+      return bp - ap;
+    });
   }
 
   function renderGlobalBoard(entries){
@@ -373,51 +457,57 @@
       return;
     }
 
-    globalMetaEl.textContent = `Viser topp ${Math.min(TOP_GLOBAL, entries.length)}`;
+    globalMetaEl.textContent = "Viser topp " + Math.min(TOP_GLOBAL, entries.length);
 
-    entries.slice(0, TOP_GLOBAL).forEach((e, idx) => {
-      const row = document.createElement("div");
+    for (var i=0;i<Math.min(TOP_GLOBAL, entries.length);i++){
+      var e = entries[i];
+      var idx = i;
+
+      var row = document.createElement("div");
       row.className = "row";
 
-      const rank = document.createElement("div");
+      var rank = document.createElement("div");
       rank.className = "rank";
       rank.textContent = String(idx + 1);
 
-      const meta = document.createElement("div");
+      var meta = document.createElement("div");
       meta.className = "metaCol";
 
-      const line1 = document.createElement("div");
+      var line1 = document.createElement("div");
       line1.className = "line1";
 
-      const score = document.createElement("div");
+      var score = document.createElement("div");
       score.className = "score";
-      score.textContent = `${e.points}p`;
+      score.textContent = String(e.points) + "p";
 
-      const date = document.createElement("div");
+      var date = document.createElement("div");
       date.className = "date";
       date.textContent = fmtDate(e.ts);
 
       line1.appendChild(score);
       line1.appendChild(date);
 
-      const line2 = document.createElement("div");
+      var line2 = document.createElement("div");
       line2.className = "line2";
-      const who = [e.name, e.className].filter(Boolean).join(" • ") || "Ukjent";
-      line2.textContent = `${who} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
+      var whoParts = [];
+      if (e.name) whoParts.push(e.name);
+      if (e.className) whoParts.push(e.className);
+      var who = whoParts.length ? whoParts.join(" • ") : "Ukjent";
+      line2.textContent = who + " • " + e.correct + "/" + e.attempts + " • " + e.accuracy + "% • streak " + e.bestStreak + " • 1–" + e.maxFactor;
 
       meta.appendChild(line1);
       meta.appendChild(line2);
 
-      const badge = document.createElement("div");
+      var badge = document.createElement("div");
       badge.className = "badge";
-      badge.textContent = `#${idx + 1}`;
+      badge.textContent = "#" + (idx + 1);
 
       row.appendChild(rank);
       row.appendChild(meta);
       row.appendChild(badge);
 
       globalListEl.appendChild(row);
-    });
+    }
   }
 
   function renderClassBoard(classStats){
@@ -426,99 +516,106 @@
 
     if (!classStats || classStats.length === 0){
       classEmptyEl.style.display = "block";
-      classEmptyEl.textContent = `Ingen klasser har minst ${TOP_IN_CLASS} navn.`;
+      classEmptyEl.textContent = "Ingen klasser har minst " + TOP_IN_CLASS + " navn.";
       classMetaEl.textContent = "";
       return;
     }
 
-    classMetaEl.textContent = `Snitt av topp ${TOP_IN_CLASS}`;
+    classMetaEl.textContent = "Snitt av topp " + TOP_IN_CLASS;
 
-    classStats.slice(0, TOP_CLASSES).forEach((c, idx) => {
-      const row = document.createElement("div");
+    for (var i=0;i<Math.min(TOP_CLASSES, classStats.length);i++){
+      var c = classStats[i];
+      var row = document.createElement("div");
       row.className = "row classRow";
 
-      const rank = document.createElement("div");
+      var rank = document.createElement("div");
       rank.className = "rank";
-      rank.textContent = String(idx + 1);
+      rank.textContent = String(i + 1);
 
-      const cls = document.createElement("div");
+      var cls = document.createElement("div");
       cls.className = "className";
       cls.textContent = c.className;
 
-      const avg = document.createElement("div");
+      var avg = document.createElement("div");
       avg.className = "classAvg badge";
-      avg.textContent = `${c.avg.toFixed(1)}p`;
+      avg.textContent = (Math.round(c.avg * 10) / 10).toFixed(1) + "p";
 
       row.appendChild(rank);
       row.appendChild(cls);
       row.appendChild(avg);
 
       classListEl.appendChild(row);
-    });
+    }
   }
 
   function computeAvgTopN(pointsList){
-    const top = pointsList.slice(0, TOP_IN_CLASS);
+    var top = pointsList.slice(0, TOP_IN_CLASS);
     if (top.length < TOP_IN_CLASS) return null;
-    const sum = top.reduce((acc, e) => acc + (Number(e?.points) || 0), 0);
+
+    var sum = 0;
+    for (var i=0;i<TOP_IN_CLASS;i++){
+      sum += (Number(top[i] && top[i].points) || 0);
+    }
     return sum / TOP_IN_CLASS;
   }
 
-  async function computeTopClasses(){
-    const jobs = ALL_CLASSES.map(async (cls) => {
-      try{
-        // Request enough to still have >= TOP_IN_CLASS after dedupe
-        const listRaw = await apiGetClassTopScores(cls, 80);
+  function computeTopClasses(cbOk){
+    var results = [];
+    var idx = 0;
 
-        // Enforce sort desc
-        listRaw.sort((a, b) => (Number(b.points)||0) - (Number(a.points)||0));
-
-        // Unique names
-        const unique = uniqByName(listRaw);
-        unique.sort((a, b) => (Number(b.points)||0) - (Number(a.points)||0));
-
-        if (unique.length < TOP_IN_CLASS) return null;
-
-        const avg = computeAvgTopN(unique);
-        if (avg === null) return null;
-
-        return { className: cls, avg };
-      }catch{
-        return null;
+    function next(){
+      if (idx >= ALL_CLASSES.length){
+        results.sort(function(a,b){ return b.avg - a.avg; });
+        cbOk(results.slice(0, TOP_CLASSES));
+        return;
       }
-    });
 
-    const results = (await Promise.all(jobs)).filter(Boolean);
-    results.sort((a, b) => b.avg - a.avg);
-    return results.slice(0, TOP_CLASSES);
+      var cls = ALL_CLASSES[idx++];
+      apiGetClassTopScores(cls, 80, function(listRaw){
+        sortByPointsDesc(listRaw);
+
+        var unique = uniqByName(listRaw);
+        sortByPointsDesc(unique);
+
+        if (unique.length >= TOP_IN_CLASS){
+          var avg = computeAvgTopN(unique);
+          if (avg !== null){
+            results.push({ className: cls, avg: avg });
+          }
+        }
+        next();
+      }, function(){
+        next();
+      });
+    }
+
+    next();
   }
 
-  async function loadAll(){
-    try{
-      globalListEl.innerHTML = "";
-      globalEmptyEl.style.display = "none";
-      globalEmptyEl.textContent = "";
-      globalMetaEl.textContent = "";
+  function loadAll(){
+    globalListEl.innerHTML = "";
+    globalEmptyEl.style.display = "none";
+    globalEmptyEl.textContent = "";
+    globalMetaEl.textContent = "";
 
-      classListEl.innerHTML = "";
-      classEmptyEl.style.display = "none";
-      classEmptyEl.textContent = "";
-      classMetaEl.textContent = "";
+    classListEl.innerHTML = "";
+    classEmptyEl.style.display = "none";
+    classEmptyEl.textContent = "";
+    classMetaEl.textContent = "";
 
-      const global = await apiGetGlobalTopScores();
+    apiGetGlobalTopScores(function(global){
       renderGlobalBoard(global);
 
-      const topClasses = await computeTopClasses();
-      renderClassBoard(topClasses);
-    }catch(e){
-      console.warn(e);
-
+      computeTopClasses(function(topClasses){
+        renderClassBoard(topClasses);
+      });
+    }, function(err){
       globalEmptyEl.style.display = "block";
       globalEmptyEl.textContent = "Får ikke kontakt med serveren.";
-
       classEmptyEl.style.display = "block";
       classEmptyEl.textContent = "Får ikke kontakt med serveren.";
-    }
+      showError("DATA ERROR:\n" + err);
+    });
   }
 
   loadAll();

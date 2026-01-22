@@ -16,10 +16,28 @@
       margin:0 auto;
       padding:20px;
     }
-    h1{
+
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
       margin:0 0 14px 0;
+    }
+
+    h1{
+      margin:0;
       font-size:34px;
       font-weight:700;
+      line-height:1.1;
+    }
+
+    .logo{
+      height:54px;
+      width:auto;
+      display:block;
+      object-fit:contain;
+      filter: drop-shadow(0 6px 16px rgba(60,30,0,.18));
     }
 
     .grid{
@@ -59,6 +77,7 @@
       font-weight:700;
       color:#6a4a00;
       white-space:nowrap;
+      min-height:18px;
     }
 
     table{
@@ -117,12 +136,17 @@
 
     @media (max-width: 900px){
       table{ font-size:22px; }
+      .logo{ height:46px; }
+      h1{ font-size:30px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>1-minuttsgangen</h1>
+    <div class="header">
+      <h1>1-minuttsgangen</h1>
+      <img class="logo" src="logo.png" alt="Logo" />
+    </div>
 
     <div class="grid">
       <div class="box">
@@ -236,7 +260,8 @@
       return;
     }
 
-    statusGlobal.innerHTML = "Viser topp " + Math.min(TOP_GLOBAL, list.length);
+    // Fjernet "Viser topp 5"
+    statusGlobal.innerHTML = "";
 
     var html = "";
     for (var i=0; i<list.length && i<TOP_GLOBAL; i++){
@@ -292,7 +317,8 @@
       return;
     }
 
-    statusClass.innerHTML = "Snitt av topp " + TOP_IN_CLASS;
+    // Fjernet "Snitt av topp 8"
+    statusClass.innerHTML = "";
 
     var html = "";
     for (var i=0; i<classStats.length && i<TOP_CLASSES; i++){
@@ -327,14 +353,12 @@
         sortByPointsDesc(data);
 
         var unique = uniqByNameSorted(data);
-        // unique already in desc order due to input being sorted and first-hit per name
         var avg = avgTopN(unique);
         if (avg !== null){
           results.push({ className: cls, avg: avg });
         }
         next();
       }, function(){
-        // skip class on error
         next();
       });
     }

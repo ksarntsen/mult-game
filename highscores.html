@@ -12,7 +12,7 @@
       color:#2a1b00;
     }
     .wrap{
-      max-width:1100px;
+      max-width:1200px;
       margin:0 auto;
       padding:20px;
     }
@@ -21,54 +21,89 @@
       font-size:34px;
       font-weight:700;
     }
+
+    .grid{
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
     .box{
       background:#fff7db;
       border:3px solid rgba(42,27,0,.25);
       border-radius:16px;
       padding:16px;
+      flex:1 1 520px;
+      min-width:320px;
     }
-    .status{
+
+    .titleRow{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .box h2{
+      margin:0;
       font-size:18px;
       font-weight:700;
       color:#6a4a00;
-      margin-bottom:10px;
+      letter-spacing:.5px;
+      text-transform:uppercase;
     }
+
+    .status{
+      font-size:14px;
+      font-weight:700;
+      color:#6a4a00;
+      white-space:nowrap;
+    }
+
     table{
       width:100%;
       border-collapse:collapse;
       font-size:26px;
     }
+
     th, td{
       padding:10px 8px;
       border-bottom:2px solid rgba(42,27,0,.15);
     }
+
     th{
       text-align:left;
       color:#6a4a00;
-      font-size:18px;
+      font-size:16px;
       letter-spacing:.5px;
       text-transform:uppercase;
     }
+
     td.rank{
       width:70px;
       font-weight:700;
       color:#6a4a00;
       text-align:center;
     }
+
     td.points{
       width:140px;
       font-weight:700;
       white-space:nowrap;
     }
+
     td.name{
       font-weight:700;
     }
+
     td.meta{
       width:220px;
       font-size:18px;
       color:#6a4a00;
       white-space:nowrap;
     }
+
     .bigError{
       margin-top:12px;
       padding:12px;
@@ -79,41 +114,73 @@
       white-space:pre-wrap;
       display:none;
     }
+
+    @media (max-width: 900px){
+      table{ font-size:22px; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>1-minuttsgangen</h1>
 
-    <div class="box">
-      <div class="status" id="status">Laster…</div>
+    <div class="grid">
+      <div class="box">
+        <div class="titleRow">
+          <h2>Top 5 (alle)</h2>
+          <div class="status" id="statusGlobal">Laster…</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px;">#</th>
+              <th style="width:140px;">Poeng</th>
+              <th>Navn</th>
+              <th style="width:220px;">Klasse</th>
+            </tr>
+          </thead>
+          <tbody id="rowsGlobal"></tbody>
+        </table>
+      </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th style="width:70px;">#</th>
-            <th style="width:140px;">Poeng</th>
-            <th>Navn</th>
-            <th style="width:220px;">Klasse</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-
-      <div class="bigError" id="errBox"></div>
+      <div class="box">
+        <div class="titleRow">
+          <h2>Topp 5 klasser</h2>
+          <div class="status" id="statusClass">Laster…</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px;">#</th>
+              <th>Klasse</th>
+              <th style="width:180px;">Snitt</th>
+            </tr>
+          </thead>
+          <tbody id="rowsClass"></tbody>
+        </table>
+      </div>
     </div>
+
+    <div class="bigError" id="errBox"></div>
   </div>
 
 <script>
 (function(){
-  var TOP = 5;
+  var TOP_GLOBAL = 5;
+  var TOP_CLASSES = 5;
+  var TOP_IN_CLASS = 8; // snitt av topp 8 (unike navn)
 
-  var statusEl = document.getElementById("status");
-  var rowsEl = document.getElementById("rows");
+  var ALL_CLASSES = ["8A","8B","8C","8D","9A","9B","9C","9D","9E","10A","10B","10C","10D","10E"];
+
+  var statusGlobal = document.getElementById("statusGlobal");
+  var rowsGlobal = document.getElementById("rowsGlobal");
+
+  var statusClass = document.getElementById("statusClass");
+  var rowsClass = document.getElementById("rowsClass");
+
   var errBox = document.getElementById("errBox");
 
   function showError(text){
-    statusEl.innerHTML = "FEIL";
     errBox.style.display = "block";
     errBox.textContent = String(text || "Ukjent feil");
   }
@@ -132,30 +199,6 @@
     var cls = (e.className === undefined || e.className === null) ? "" : String(e.className);
 
     return { points: points, name: name, className: cls };
-  }
-
-  function render(list){
-    rowsEl.innerHTML = "";
-
-    if (!list || !list.length){
-      statusEl.innerHTML = "Ingen scorer lagret ennå.";
-      return;
-    }
-
-    statusEl.innerHTML = "Topp " + Math.min(TOP, list.length);
-
-    var i, e, html = "";
-    for (i = 0; i < list.length && i < TOP; i++){
-      e = normalize(list[i]);
-      html += ""
-        + "<tr>"
-        +   "<td class='rank'>" + (i+1) + "</td>"
-        +   "<td class='points'>" + esc(e.points) + "p</td>"
-        +   "<td class='name'>" + esc(e.name) + "</td>"
-        +   "<td class='meta'>" + esc(e.className) + "</td>"
-        + "</tr>";
-    }
-    rowsEl.innerHTML = html;
   }
 
   function requestJson(url, ok, fail){
@@ -185,13 +228,139 @@
     }
   }
 
-  // Single request. No class stats. No fancy JS.
-  requestJson("/.netlify/functions/get-top-scores", function(data){
-    if (Object.prototype.toString.call(data) !== "[object Array]") data = [];
-    render(data);
-  }, function(err){
-    showError(err);
-  });
+  function renderGlobal(list){
+    rowsGlobal.innerHTML = "";
+
+    if (!list || !list.length){
+      statusGlobal.innerHTML = "Ingen scorer.";
+      return;
+    }
+
+    statusGlobal.innerHTML = "Viser topp " + Math.min(TOP_GLOBAL, list.length);
+
+    var html = "";
+    for (var i=0; i<list.length && i<TOP_GLOBAL; i++){
+      var e = normalize(list[i]);
+      html += ""
+        + "<tr>"
+        +   "<td class='rank'>" + (i+1) + "</td>"
+        +   "<td class='points'>" + esc(e.points) + "p</td>"
+        +   "<td class='name'>" + esc(e.name) + "</td>"
+        +   "<td class='meta'>" + esc(e.className) + "</td>"
+        + "</tr>";
+    }
+    rowsGlobal.innerHTML = html;
+  }
+
+  function uniqByNameSorted(list){
+    // list expected already sorted desc by points
+    var seen = {};
+    var out = [];
+    for (var i=0;i<list.length;i++){
+      var e = normalize(list[i]);
+      var key = String(e.name || "").replace(/^\s+|\s+$/g,"").toLowerCase();
+      if (!key) continue;
+      if (seen[key]) continue;
+      seen[key] = true;
+      out.push(e);
+    }
+    return out;
+  }
+
+  function sortByPointsDesc(list){
+    list.sort(function(a,b){
+      var ap = Number(a && a.points) || 0;
+      var bp = Number(b && b.points) || 0;
+      return bp - ap;
+    });
+  }
+
+  function avgTopN(uniqueList){
+    if (!uniqueList || uniqueList.length < TOP_IN_CLASS) return null;
+    var sum = 0;
+    for (var i=0;i<TOP_IN_CLASS;i++){
+      sum += (Number(uniqueList[i] && uniqueList[i].points) || 0);
+    }
+    return sum / TOP_IN_CLASS;
+  }
+
+  function renderClasses(classStats){
+    rowsClass.innerHTML = "";
+
+    if (!classStats || !classStats.length){
+      statusClass.innerHTML = "Ingen klasser (min. " + TOP_IN_CLASS + " navn).";
+      return;
+    }
+
+    statusClass.innerHTML = "Snitt av topp " + TOP_IN_CLASS;
+
+    var html = "";
+    for (var i=0; i<classStats.length && i<TOP_CLASSES; i++){
+      var c = classStats[i];
+      var avg = Math.round(c.avg * 10) / 10;
+      html += ""
+        + "<tr>"
+        +   "<td class='rank'>" + (i+1) + "</td>"
+        +   "<td class='name'>" + esc(c.className) + "</td>"
+        +   "<td class='points'>" + avg.toFixed(1) + "p</td>"
+        + "</tr>";
+    }
+    rowsClass.innerHTML = html;
+  }
+
+  function computeTopClasses(done){
+    var results = [];
+    var idx = 0;
+
+    function next(){
+      if (idx >= ALL_CLASSES.length){
+        results.sort(function(a,b){ return b.avg - a.avg; });
+        done(results.slice(0, TOP_CLASSES));
+        return;
+      }
+
+      var cls = ALL_CLASSES[idx++];
+      var url = "/.netlify/functions/get-top-scores?className=" + encodeURIComponent(cls) + "&limit=80";
+
+      requestJson(url, function(data){
+        if (Object.prototype.toString.call(data) !== "[object Array]") data = [];
+        sortByPointsDesc(data);
+
+        var unique = uniqByNameSorted(data);
+        // unique already in desc order due to input being sorted and first-hit per name
+        var avg = avgTopN(unique);
+        if (avg !== null){
+          results.push({ className: cls, avg: avg });
+        }
+        next();
+      }, function(){
+        // skip class on error
+        next();
+      });
+    }
+
+    next();
+  }
+
+  function load(){
+    statusGlobal.innerHTML = "Laster…";
+    statusClass.innerHTML = "Laster…";
+
+    requestJson("/.netlify/functions/get-top-scores", function(data){
+      if (Object.prototype.toString.call(data) !== "[object Array]") data = [];
+      renderGlobal(data);
+
+      computeTopClasses(function(classStats){
+        renderClasses(classStats);
+      });
+    }, function(err){
+      statusGlobal.innerHTML = "FEIL";
+      statusClass.innerHTML = "FEIL";
+      showError(err);
+    });
+  }
+
+  load();
 })();
 </script>
 </body>

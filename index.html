@@ -670,7 +670,6 @@
       padding-right:4px;
     }
 
-
     /* Modal (andres highscores) */
     .modalOverlay{
       position:fixed;
@@ -814,6 +813,17 @@
       font-size:12px;
       padding:10px 2px;
     }
+
+    /* Footer */
+    .footer{
+      margin-top:14px;
+      text-align:center;
+      color:rgba(42,27,0,.55);
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.2px;
+      user-select:none;
+    }
   </style>
 </head>
 <body>
@@ -922,6 +932,8 @@
       </div>
 
     </div>
+
+    <div class="footer" id="footerCopy"></div>
   </div>
 
   <div id="othersModal" class="modalOverlay" style="display:none;">
@@ -976,7 +988,6 @@
       </form>
     </div>
   </div>
-
 
 <script>
 (() => {
@@ -1303,7 +1314,6 @@
     }
   }
 
-
   // ========= UI refs =========
   const timeLeftEl = document.getElementById("timeLeft");
   const pointsEl = document.getElementById("points");
@@ -1555,7 +1565,6 @@
       othersListEl.appendChild(row);
     });
   }
-
 
   // ========= Difficulty =========
   function setDifficulty(n) {
@@ -2065,7 +2074,6 @@
     if (e.key === "Escape" && othersModal.style.display === "flex") closeOthersModal();
   });
 
-
   answerInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.code === "Space") {
       e.preventDefault();
@@ -2078,6 +2086,9 @@
   });
 
   // ========= init =========
+  document.getElementById("footerCopy").textContent =
+    `© ${new Date().getFullYear()} Kristian Arntsen`;
+
   setDifficulty(10);
   resetAll();
   refreshMyScores().catch(() => {});

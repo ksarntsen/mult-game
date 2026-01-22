@@ -2,8 +2,10 @@ import { ensureSchema, sqlQuery, jsonResponse, methodNotAllowed } from "./_db.js
 
 // Behavior:
 // - With className: top N scores for that class, one per unique name (best score)
-// - Without className: global top N, one per unique name (best score)
-// NOTE: "Unique name" is case-insensitive.
+// - Without className: global top N, one per unique (name + className) (best score)
+// NOTE:
+// - For global list, "unique player" is (LOWER(name), class_name) so same name in different classes both show up.
+// - For class list, class is already fixed, so unique by LOWER(name) is correct.
 // Optional query param: ?limit=NUMBER
 // - Default: class=5, global=25
 // - Clamped: class 1..200, global 1..500
@@ -20,7 +22,6 @@ export default async (req) => {
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
   const defaultLimit = isClass ? 5 : 25;
-
   let limit = defaultLimit;
 
   // IMPORTANT: only parse if the param exists
@@ -91,12 +92,13 @@ export default async (req) => {
     : await sqlQuery(
         `
           WITH best AS (
-            SELECT DISTINCT ON (LOWER(name))
+            SELECT DISTINCT ON (LOWER(name), class_name)
               *
             FROM (
               ${baseSelect}
+              WHERE class_name IS NOT NULL
             ) s
-            ORDER BY LOWER(name), points DESC, accuracy DESC, best_streak DESC, created_at DESC
+            ORDER BY LOWER(name), class_name, points DESC, accuracy DESC, best_streak DESC, created_at DESC
           )
           SELECT
             player_id,

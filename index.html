@@ -455,7 +455,7 @@
     button:hover{
       background: rgba(255,255,255,.95);
       border-color: rgba(255,109,0,.45);
-      box-shadow: 0 18px 28px rgba(255,109,0,.18);
+      box-shadow: 0 18px 28px rgba(60,30,0,.18);
     }
 
     button:active{ transform: translateY(1px); }
@@ -2091,7 +2091,21 @@
 
   setDifficulty(10);
   resetAll();
-  refreshMyScores().catch(() => {});
+
+  // Ask for name + class immediately on first open (before playing)
+  startBtn.disabled = true;
+  playAgainBtn.disabled = true;
+  seeOthersBtn.disabled = true;
+
+  (async () => {
+    try{
+      await ensureProfileAfterFirstGame(); // shows modal if missing name/class
+    }catch{}
+    startBtn.disabled = false;
+    playAgainBtn.disabled = false;
+    seeOthersBtn.disabled = false;
+    refreshMyScores().catch(() => {});
+  })();
 })();
 </script>
 </body>

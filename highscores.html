@@ -84,11 +84,13 @@
       width:100%;
       border-collapse:collapse;
       font-size:26px;
+      table-layout:fixed; /* enables ellipsis in fixed-width cells */
     }
 
     th, td{
       padding:10px 8px;
       border-bottom:2px solid rgba(42,27,0,.15);
+      overflow:hidden; /* required for ellipsis in table cells */
     }
 
     th{
@@ -97,6 +99,7 @@
       font-size:16px;
       letter-spacing:.5px;
       text-transform:uppercase;
+      white-space:nowrap;
     }
 
     td.rank{
@@ -104,6 +107,7 @@
       font-weight:700;
       color:#6a4a00;
       text-align:center;
+      white-space:nowrap;
     }
 
     td.points{
@@ -112,15 +116,21 @@
       white-space:nowrap;
     }
 
+    /* Ellipsis for long names (no wrapping, no line breaks) */
     td.name{
       font-weight:700;
+      white-space:nowrap;
+      text-overflow:ellipsis;
     }
 
+    /* Make class column narrower and prevent wrapping */
     td.meta{
-      width:220px;
+      width:90px;          /* narrower than before */
       font-size:18px;
       color:#6a4a00;
       white-space:nowrap;
+      text-overflow:ellipsis;
+      text-align:left;
     }
 
     .bigError{
@@ -138,6 +148,8 @@
       table{ font-size:22px; }
       .logo{ height:46px; }
       h1{ font-size:30px; }
+      td.meta{ width:80px; }
+      td.points{ width:130px; }
     }
   </style>
 </head>
@@ -160,7 +172,7 @@
               <th style="width:70px;">#</th>
               <th style="width:140px;">Poeng</th>
               <th>Navn</th>
-              <th style="width:220px;">Klasse</th>
+              <th style="width:90px;">Klasse</th>
             </tr>
           </thead>
           <tbody id="rowsGlobal"></tbody>
@@ -260,7 +272,6 @@
       return;
     }
 
-    // Fjernet "Viser topp 5"
     statusGlobal.innerHTML = "";
 
     var html = "";
@@ -270,7 +281,7 @@
         + "<tr>"
         +   "<td class='rank'>" + (i+1) + "</td>"
         +   "<td class='points'>" + esc(e.points) + "p</td>"
-        +   "<td class='name'>" + esc(e.name) + "</td>"
+        +   "<td class='name' title='" + esc(e.name) + "'>" + esc(e.name) + "</td>"
         +   "<td class='meta'>" + esc(e.className) + "</td>"
         + "</tr>";
     }
@@ -317,7 +328,6 @@
       return;
     }
 
-    // Fjernet "Snitt av topp 8"
     statusClass.innerHTML = "";
 
     var html = "";
@@ -327,7 +337,7 @@
       html += ""
         + "<tr>"
         +   "<td class='rank'>" + (i+1) + "</td>"
-        +   "<td class='name'>" + esc(c.className) + "</td>"
+        +   "<td class='name' title='" + esc(c.className) + "'>" + esc(c.className) + "</td>"
         +   "<td class='points'>" + avg.toFixed(1) + "p</td>"
         + "</tr>";
     }

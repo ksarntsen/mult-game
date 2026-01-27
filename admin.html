@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="no">
 <head>
@@ -98,12 +99,14 @@
       border-radius:14px;
       border:1px solid var(--border);
       background:#fff;
+      table-layout: fixed; /* needed for ellipsis + reliable column widths */
     }
     th, td{
       padding:10px 8px;
       border-bottom:1px solid rgba(42,27,0,.12);
       font-size:13px;
       vertical-align:top;
+      overflow:hidden; /* prevent cell content from spilling */
     }
     th{
       text-align:left;
@@ -137,6 +140,32 @@
       font-size:12px;
       color:var(--muted);
       margin-top:10px;
+    }
+
+    /* column sizing */
+    col.col-id      { width: 72px; }
+    col.col-time    { width: 150px; }
+    col.col-name    { width: 220px; } /* wider */
+    col.col-class   { width: 54px; }  /* narrower (max 3 symbols) */
+    col.col-points  { width: 70px; }
+    col.col-acc     { width: 58px; }
+    col.col-streak  { width: 58px; }
+    col.col-max     { width: 58px; }
+    col.col-pid     { width: 220px; }
+    col.col-actions { width: 180px; }
+
+    /* ellipsis helpers */
+    .truncate{
+      display:block;
+      max-width:100%;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    td.classCell, th.classCell{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
   </style>
 </head>
@@ -194,12 +223,24 @@
 
       <div style="margin-top:10px; overflow:auto;">
         <table>
+          <colgroup>
+            <col class="col-id" />
+            <col class="col-time" />
+            <col class="col-name" />
+            <col class="col-class" />
+            <col class="col-points" />
+            <col class="col-acc" />
+            <col class="col-streak" />
+            <col class="col-max" />
+            <col class="col-pid" />
+            <col class="col-actions" />
+          </colgroup>
           <thead>
             <tr>
               <th>ID</th>
               <th>Tid</th>
               <th>Navn</th>
-              <th>Klasse</th>
+              <th class="classCell">Klasse</th>
               <th>Poeng</th>
               <th>Acc</th>
               <th>Streak</th>
@@ -298,7 +339,7 @@
   function render(rows){
     lastRows = rows || [];
     tbody.innerHTML = "";
-    countPill.textContent = `${lastRows.length} treff`;
+    countPill.textContent = (lastRows.length + " treff");
     selectedPlayerId = (playerEl.value || "").trim();
     btnDeleteUser.disabled = !selectedPlayerId;
 
@@ -308,13 +349,13 @@
       tr.innerHTML = `
         <td class="mono">${r.id}</td>
         <td>${fmtTime(r.ts)}</td>
-        <td><b>${escapeHtml(r.name)}</b></td>
-        <td>${escapeHtml(r.className)}</td>
+        <td><b class="truncate" title="${escapeAttr(r.name)}">${escapeHtml(r.name)}</b></td>
+        <td class="classCell" title="${escapeAttr(r.className)}">${escapeHtml(r.className)}</td>
         <td><b>${r.points}</b></td>
         <td>${r.accuracy}%</td>
         <td>${r.bestStreak}</td>
         <td>${r.maxFactor}</td>
-        <td class="mono">${escapeHtml(r.playerId)}</td>
+        <td class="mono"><span class="truncate" title="${escapeAttr(r.playerId)}">${escapeHtml(r.playerId)}</span></td>
         <td>
           <div class="actions">
             <button class="danger" data-del="${r.id}">Slett score</button>
@@ -424,3 +465,4 @@
 </script>
 </body>
 </html>
+```

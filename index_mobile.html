@@ -1,4 +1,4 @@
-<!-- index_mobile.html -->
+<!-- index_mobile.html (oppdatert layout: stopp/spill-igjen i venstre “tomt” felt, spørsmål ved siden av svar, fjernet Mine/Andre) -->
 <!doctype html>
 <html lang="no">
 <head>
@@ -42,7 +42,7 @@
     .app{
       height:100vh;
       height:100dvh;
-      padding: calc(12px + var(--safeTop)) 12px calc(12px + var(--safeBot));
+      padding: calc(10px + var(--safeTop)) 10px calc(10px + var(--safeBot));
       display:flex;
       flex-direction:column;
       gap:10px;
@@ -74,16 +74,17 @@
       pointer-events:none;
     }
 
+    /* Header */
     .hdr{
-      padding: 12px 12px 10px;
+      padding: 10px 10px 8px;
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:8px;
     }
 
     .titleRow{
       display:flex;
-      gap:10px;
+      gap:8px;
       align-items:center;
       justify-content:space-between;
     }
@@ -91,7 +92,7 @@
     .title{
       font-weight: 1000;
       letter-spacing:.2px;
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.1;
       user-select:none;
       white-space:nowrap;
@@ -110,7 +111,7 @@
       background: rgba(255,255,255,.80);
       color: var(--text);
       border-radius:999px;
-      padding: 8px 10px;
+      padding: 7px 9px;
       font-size: 12px;
       font-weight: 950;
       box-shadow: 0 10px 18px rgba(60,30,0,.08);
@@ -127,14 +128,14 @@
     .stats{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:8px;
+      gap:6px;
     }
 
     .chip{
       border:1px solid rgba(42,27,0,.14);
       background: rgba(255,255,255,.78);
       border-radius: 14px;
-      padding: 10px 10px;
+      padding: 8px 9px;
       font-size: 12px;
       font-weight: 900;
       display:flex;
@@ -167,7 +168,7 @@
     }
 
     .bar{
-      height:10px;
+      height:9px;
       border-radius:999px;
       border:1px solid rgba(42,27,0,.14);
       background: rgba(255,255,255,.75);
@@ -183,10 +184,11 @@
       transition: transform .12s linear;
     }
 
+    /* Combo */
     .combo{
       display:flex;
       flex-direction:column;
-      gap:7px;
+      gap:6px;
     }
     .comboTop{
       display:flex;
@@ -194,7 +196,7 @@
       justify-content:space-between;
       font-size: 12px;
       font-weight: 950;
-      color: var(--muted);
+      color:var(--muted);
       user-select:none;
       letter-spacing:.2px;
     }
@@ -210,7 +212,7 @@
     }
 
     .comboBar{
-      height:14px;
+      height:12px;
       border-radius:999px;
       border:1px solid rgba(42,27,0,.14);
       background: rgba(255,255,255,.75);
@@ -264,142 +266,119 @@
       to{ background-position: 100% 50%; }
     }
 
+    /* Main */
     .main{
       flex:1;
       min-height:0;
       display:flex;
       flex-direction:column;
-      gap:8px;
-      padding: 6px 12px 10px;
+      gap:6px;
+      padding: 4px 10px 6px;
       align-items:center;
-      justify-content:center;
+      justify-content:flex-start;
+    }
+
+    .qaRow{
+      width:min(560px, 100%);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top: 2px;
     }
 
     .problem{
-      font-size: clamp(32px, 7.2vw, 56px);
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: clamp(26px, 7vw, 44px);
       line-height:1.05;
       font-weight: 1200;
-      letter-spacing: .4px;
+      letter-spacing: .3px;
       font-variant-numeric: tabular-nums;
       text-shadow: 0 10px 18px rgba(60,30,0,.10);
       user-select:none;
-      text-align:center;
-    }
-
-    .sub{
-      font-size: 12px;
-      font-weight: 900;
-      color: var(--muted);
-      user-select:none;
-      text-align:center;
-      margin-top: -2px;
+      text-align:left;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     .answerDisplay{
-      width: min(520px, 100%);
+      flex: 0 0 auto;
+      width: clamp(120px, 34vw, 200px);
       border-radius: 18px;
       border: 2px solid rgba(255,109,0,.35);
       background: rgba(255,255,255,.92);
       box-shadow: 0 14px 25px rgba(60,30,0,.10);
-      padding: 12px 14px;
-      font-size: clamp(26px, 6vw, 40px);
+      padding: 10px 10px;
+      font-size: clamp(22px, 6vw, 34px);
       font-weight: 1200;
       letter-spacing:.3px;
       font-variant-numeric: tabular-nums;
       text-align:center;
       user-select:none;
-      min-height: 56px;
+      min-height: 52px;
       display:flex;
       align-items:center;
       justify-content:center;
     }
     .answerDisplay.disabled{ opacity:.55; }
 
-    .hint{
+    .sub{
       font-size: 11px;
+      font-weight: 900;
+      color:var(--muted);
+      user-select:none;
+      text-align:center;
+      margin-top: -2px;
+    }
+
+    .hint{
+      font-size: 10px;
       font-weight: 900;
       color: rgba(106,74,0,.85);
       user-select:none;
-      margin-top:-2px;
+      margin-top: -4px;
       text-align:center;
     }
 
     .feedback{
-      min-height: 22px;
+      min-height: 18px;
       display:flex;
       align-items:center;
       justify-content:center;
       gap:8px;
       flex-wrap:wrap;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 1000;
       user-select:none;
       text-align:center;
+      padding: 0 6px;
     }
     .feedback .tag{
-      padding: 6px 10px;
+      padding: 5px 9px;
       border-radius: 999px;
       border: 1px solid rgba(42,27,0,.14);
       background: rgba(255,255,255,.80);
       color: var(--muted);
       font-weight: 950;
-      font-size: 12px;
+      font-size: 11px;
     }
     .feedback.good{ color: var(--good); }
     .feedback.bad{ color: var(--bad); }
 
+    /* Bottom */
     .bottom{
-      padding: 0 12px 12px;
+      padding: 0 10px 10px;
       display:flex;
       flex-direction:column;
-      gap:10px;
-    }
-
-    .ctrlRow{
-      display:flex;
       gap:8px;
-      align-items:center;
-      justify-content:space-between;
-    }
-
-    .btn{
-      border:2px solid rgba(42,27,0,.14);
-      background: rgba(255,255,255,.86);
-      color: var(--text);
-      border-radius: 16px;
-      padding: 12px 12px;
-      font-weight: 1100;
-      font-size: 14px;
-      box-shadow: 0 16px 26px rgba(60,30,0,.10);
-      user-select:none;
-      touch-action: manipulation;
-      flex:1;
-    }
-    .btn:active{ transform: translateY(1px); }
-    .btn:disabled{ opacity:.55; transform:none; }
-
-    .btn.primary{
-      background: linear-gradient(180deg, rgba(255,214,10,.95), rgba(255,109,0,.85));
-      border-color: rgba(255,109,0,.55);
-      color:#2a1b00;
-    }
-    .btn.danger{
-      background: linear-gradient(180deg, rgba(214,40,40,.18), rgba(214,40,40,.10));
-      border-color: rgba(214,40,40,.35);
-    }
-    .btn.ghost{
-      background: rgba(255,255,255,.70);
-      border-color: rgba(42,27,0,.12);
-      flex:0 0 auto;
-      width: 92px;
-      padding: 12px 10px;
-      font-size: 13px;
     }
 
     .keypad{
       display:grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
+      gap: 9px;
     }
 
     .key{
@@ -407,13 +386,13 @@
       background: rgba(255,255,255,.88);
       border-radius: 18px;
       box-shadow: 0 16px 26px rgba(60,30,0,.10);
-      padding: 14px 10px;
+      padding: 12px 10px;
       font-weight: 1200;
       font-size: 22px;
       text-align:center;
       user-select:none;
       touch-action: manipulation;
-      min-height: 54px;
+      min-height: 52px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -429,11 +408,21 @@
       letter-spacing:.2px;
     }
 
-    .key.blank{
-      background: transparent;
-      border: 2px dashed rgba(42,27,0,.12);
-      box-shadow:none;
-      opacity:.4;
+    .key.stopKey{
+      font-size: 15px;
+      font-weight: 1100;
+      letter-spacing:.2px;
+      padding: 10px 8px;
+    }
+    .key.stopKey.startMode{
+      background: linear-gradient(180deg, rgba(255,214,10,.95), rgba(255,109,0,.85));
+      border-color: rgba(255,109,0,.55);
+      color:#2a1b00;
+    }
+    .key.stopKey.stopMode{
+      background: linear-gradient(180deg, rgba(214,40,40,.18), rgba(214,40,40,.10));
+      border-color: rgba(214,40,40,.35);
+      color: var(--text);
     }
 
     .footerCopy{
@@ -446,6 +435,7 @@
       padding-top: 2px;
     }
 
+    /* Overlays / Modals */
     .overlay{
       position:fixed;
       inset:0;
@@ -530,7 +520,12 @@
     }
     @media (max-width: 360px){
       .metaGrid{ grid-template-columns: 1fr; }
-      .btn.ghost{ width: 84px; }
+    }
+    /* Små skjermer: QA kan stable */
+    @media (max-width: 340px){
+      .qaRow{ flex-direction:column; align-items:stretch; gap:8px; }
+      .problem{ text-align:center; }
+      .answerDisplay{ width:100%; }
     }
 
     .tile{
@@ -663,13 +658,41 @@
       background: rgba(255,255,255,.70);
     }
 
-    .modalFtr .btn{ box-shadow: 0 12px 22px rgba(60,30,0,.08); }
+    .btn{
+      border:2px solid rgba(42,27,0,.14);
+      background: rgba(255,255,255,.86);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 12px;
+      font-weight: 1100;
+      font-size: 14px;
+      box-shadow: 0 12px 22px rgba(60,30,0,.08);
+      user-select:none;
+      touch-action: manipulation;
+      flex:1;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn:disabled{ opacity:.55; transform:none; }
+
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(255,214,10,.95), rgba(255,109,0,.85));
+      border-color: rgba(255,109,0,.55);
+      color:#2a1b00;
+    }
+    .btn.ghost{
+      background: rgba(255,255,255,.70);
+      border-color: rgba(42,27,0,.12);
+      flex:0 0 auto;
+      width:auto;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
 
     .flash{
       position:absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
       transform: translateY(120%);
       opacity:0;
       pointer-events:none;
@@ -679,7 +702,7 @@
       background: rgba(214,40,40,.10);
       box-shadow: 0 16px 30px rgba(214,40,40,.12);
       font-weight: 1200;
-      font-size: 22px;
+      font-size: 20px;
       text-align:center;
       transition: transform .12s ease, opacity .12s ease;
       user-select:none;
@@ -736,24 +759,18 @@
       </div>
 
       <div class="main">
-        <div class="problem" id="problemText">Trykk Start</div>
-        <div class="sub" id="subText">Du har 60 sekunder og 3 liv.</div>
+        <div class="qaRow">
+          <div class="problem" id="problemText">Trykk Start</div>
+          <div id="answerDisplay" class="answerDisplay disabled" role="button" aria-label="Svar">—</div>
+        </div>
 
-        <div id="answerDisplay" class="answerDisplay disabled" role="button" aria-label="Svar">—</div>
+        <div class="sub" id="subText">Du har 60 sekunder og 3 liv.</div>
         <div class="hint" id="answerHint">Trykk på svaret for å slette • hold for å tømme</div>
 
         <div class="feedback" id="feedback" aria-live="polite"></div>
       </div>
 
       <div class="bottom">
-        <div class="ctrlRow" aria-label="Kontroller">
-          <button id="startBtn" class="btn primary" type="button">Start</button>
-          <button id="playAgainBtn" class="btn primary" type="button" style="display:none;">Spill igjen</button>
-          <button id="stopBtn" class="btn danger" type="button" disabled>Stopp</button>
-          <button id="myScoresBtn" class="btn ghost" type="button">Mine</button>
-          <button id="seeOthersBtn" class="btn ghost" type="button">Andre</button>
-        </div>
-
         <div class="keypad" aria-label="Talltastatur">
           <button class="key" type="button" data-digit="1">1</button>
           <button class="key" type="button" data-digit="2">2</button>
@@ -767,7 +784,8 @@
           <button class="key" type="button" data-digit="8">8</button>
           <button class="key" type="button" data-digit="9">9</button>
 
-          <div class="key blank" aria-hidden="true"></div>
+          <!-- Venstre for 0: Stopp (når running) / Start / Spill igjen (når idle) -->
+          <button id="stopKeyBtn" class="key stopKey startMode" type="button">Start</button>
           <button class="key" type="button" data-digit="0">0</button>
           <button id="answerBtn" class="key answer" type="button">Svar</button>
         </div>
@@ -779,6 +797,7 @@
     </div>
   </div>
 
+  <!-- Finish modal -->
   <div id="finishOverlay" class="overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Oppsummering">
       <div class="modalHdr">
@@ -786,7 +805,7 @@
           <h3>Ferdig</h3>
           <div class="sub" id="finishReason"></div>
         </div>
-        <button id="finishCloseBtn" class="btn ghost" type="button" style="width:auto;">Lukk</button>
+        <button id="finishCloseBtn" class="btn ghost" type="button">Lukk</button>
       </div>
 
       <div class="modalBody">
@@ -820,6 +839,7 @@
     </div>
   </div>
 
+  <!-- My scores modal -->
   <div id="myScoresOverlay" class="overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Mine highscores">
       <div class="modalHdr">
@@ -827,7 +847,7 @@
           <h3>Highscore</h3>
           <div class="sub">Dine topp 10 (trykk på en rad)</div>
         </div>
-        <button id="myScoresCloseBtn" class="btn ghost" type="button" style="width:auto;">Lukk</button>
+        <button id="myScoresCloseBtn" class="btn ghost" type="button">Lukk</button>
       </div>
       <div class="modalBody">
         <div class="list" id="myScoresList"></div>
@@ -840,6 +860,7 @@
     </div>
   </div>
 
+  <!-- Others modal -->
   <div id="othersOverlay" class="overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Andres highscores">
       <div class="modalHdr">
@@ -847,7 +868,7 @@
           <h3>Andres highscores</h3>
           <div class="sub" id="othersSub"></div>
         </div>
-        <button id="othersCloseBtn" class="btn ghost" type="button" style="width:auto;">Lukk</button>
+        <button id="othersCloseBtn" class="btn ghost" type="button">Lukk</button>
       </div>
       <div class="modalBody">
         <div class="tabs">
@@ -864,6 +885,7 @@
     </div>
   </div>
 
+  <!-- Profile modal -->
   <div id="profileOverlay" class="overlay" aria-hidden="true" style="display:flex;">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Registrer deg">
       <div class="modalHdr">
@@ -914,22 +936,27 @@
   let a = 0;
   let b = 0;
 
+  const WRONG_PAUSE_MS = 1300;
   let maxFactor = 10;
 
-  const WRONG_PAUSE_MS = 1300;
-
+  // Input (touch keypad)
   let answerStr = "";
   let keypadLocked = true;
 
+  // Round timing + mistakes
   let roundStartPerf = 0;
   let roundEndPerf = 0;
-  let mistakes = [];
+  let mistakes = []; // {a,b,userAnswer,correctAnswer}
 
+  // Per-problem timing
   let currentProblemStartPerf = 0;
-  let correctTimes = [];
+  let correctTimes = []; // {a,b,correctAnswer,sec}
 
   let rafId = null;
   let lastNow = 0;
+
+  // For Start vs Spill igjen label
+  let hasPlayedEver = false;
 
   function timeBonusPerCorrect(){
     if (maxFactor <= 5) return 0.4;
@@ -1012,6 +1039,7 @@
     return copy.slice(0, 3);
   }
 
+  // ========= Highscores (Netlify DB) =========
   const LS_PROFILE_KEY = "multTrainerProfileV1";
   const MAX_SCORES = 10;
 
@@ -1200,6 +1228,7 @@
     return s.toLowerCase() !== "ukjent";
   }
 
+  // ========= UI refs =========
   const timeLeftEl = document.getElementById("timeLeft");
   const pointsEl = document.getElementById("points");
   const timeBarEl = document.getElementById("timeBar");
@@ -1214,6 +1243,8 @@
   const answerHintEl = document.getElementById("answerHint");
   const answerBtn = document.getElementById("answerBtn");
 
+  const stopKeyBtn = document.getElementById("stopKeyBtn");
+
   const feedbackEl = document.getElementById("feedback");
   const wrongFlashEl = document.getElementById("wrongFlash");
 
@@ -1222,18 +1253,12 @@
   const comboBaseEl = document.getElementById("comboBase");
   const comboFillEl = document.getElementById("comboFill");
 
-  const startBtn = document.getElementById("startBtn");
-  const playAgainBtn = document.getElementById("playAgainBtn");
-  const stopBtn = document.getElementById("stopBtn");
-
-  const myScoresBtn = document.getElementById("myScoresBtn");
-  const seeOthersBtn = document.getElementById("seeOthersBtn");
-
   const d5 = document.getElementById("d5");
   const d10 = document.getElementById("d10");
   const d12 = document.getElementById("d12");
   const diffButtons = [d5, d10, d12];
 
+  // Modals
   const finishOverlay = document.getElementById("finishOverlay");
   const finishCloseBtn = document.getElementById("finishCloseBtn");
   const finishPlayAgainBtn = document.getElementById("finishPlayAgainBtn");
@@ -1273,6 +1298,7 @@
 
   const keypadKeys = Array.from(document.querySelectorAll(".keypad .key[data-digit]"));
 
+  // ========= UI helpers =========
   function setFeedback(type, text, tagText) {
     feedbackEl.className = "feedback";
     feedbackEl.textContent = "";
@@ -1367,16 +1393,29 @@
     answerDisplayEl.classList.toggle("disabled", !on);
   }
 
+  function setStopKeyMode(mode){
+    stopKeyBtn.classList.remove("startMode", "stopMode");
+    if (mode === "stop"){
+      stopKeyBtn.textContent = "Stopp";
+      stopKeyBtn.classList.add("stopMode");
+      return;
+    }
+    stopKeyBtn.classList.add("startMode");
+    stopKeyBtn.textContent = hasPlayedEver ? "Spill igjen" : "Start";
+  }
+
   function updateUI() {
     timeLeftEl.textContent = time.toFixed(1);
     pointsEl.textContent = String(points);
     streakEl.textContent = String(streak);
+
     updateHearts();
     updateComboMeter();
     updateTimeBar();
     renderAnswerDisplay();
   }
 
+  // ========= Difficulty =========
   function setDifficulty(n) {
     maxFactor = n;
     diffButtons.forEach(btn => btn.classList.remove("active"));
@@ -1440,6 +1479,7 @@
     rafId = requestAnimationFrame(tick);
   }
 
+  // ========= Input =========
   function addDigit(d){
     if (!running || keypadLocked) return;
     if (!/^\d$/.test(String(d))) return;
@@ -1464,6 +1504,7 @@
     renderAnswerDisplay();
   }
 
+  // Tap to backspace, long-press to clear
   let holdTimer = null;
   answerDisplayEl.addEventListener("pointerdown", () => {
     if (!running || keypadLocked) return;
@@ -1487,220 +1528,7 @@
     }
   });
 
-  function resetAll() {
-    running = false;
-
-    time = 60.0;
-    points = 0;
-    attempts = 0;
-    correct = 0;
-
-    streak = 0;
-    bestStreak = 0;
-    lives = 3;
-
-    mistakes = [];
-    correctTimes = [];
-    currentProblemStartPerf = 0;
-
-    roundStartPerf = 0;
-    roundEndPerf = 0;
-
-    answerStr = "";
-    setKeypadEnabled(false);
-
-    problemTextEl.textContent = "Trykk Start";
-    subTextEl.textContent = `Du har 60 sekunder og 3 liv. (1–${maxFactor})`;
-
-    setFeedback("", "");
-    hideWrongFlash();
-
-    startBtn.style.display = "block";
-    startBtn.disabled = false;
-    playAgainBtn.style.display = "none";
-    stopBtn.disabled = true;
-
-    myScoresBtn.disabled = false;
-    seeOthersBtn.disabled = false;
-
-    diffButtons.forEach(b => b.disabled = false);
-
-    stopClock();
-    updateUI();
-  }
-
-  function lockPlayingUI(){
-    startBtn.style.display = "none";
-    playAgainBtn.style.display = "none";
-    stopBtn.disabled = false;
-
-    myScoresBtn.disabled = true;
-    seeOthersBtn.disabled = true;
-
-    diffButtons.forEach(b => b.disabled = true);
-
-    answerHintEl.style.opacity = "1";
-  }
-
-  function unlockIdleUI(){
-    stopBtn.disabled = true;
-
-    myScoresBtn.disabled = false;
-    seeOthersBtn.disabled = false;
-
-    diffButtons.forEach(b => b.disabled = false);
-
-    answerHintEl.style.opacity = "1";
-  }
-
-  function startGame() {
-    hideFinishOverlay();
-    hideMyScoresOverlay();
-    hideOthersOverlay();
-
-    resetAll();
-    running = true;
-    roundStartPerf = performance.now();
-
-    lockPlayingUI();
-    setKeypadEnabled(true);
-
-    newProblem();
-    updateUI();
-    startClock();
-  }
-
-  function endGame(reason) {
-    running = false;
-    setKeypadEnabled(false);
-    stopClock();
-
-    roundEndPerf = performance.now();
-    const elapsedSec = roundStartPerf ? Math.max(0, (roundEndPerf - roundStartPerf) / 1000) : 0;
-
-    problemTextEl.textContent = "Ferdig";
-    let reasonText = "Tiden er ute.";
-    if (reason === "lives") reasonText = "Du mistet alle liv.";
-    if (reason === "stop") reasonText = "Stoppa.";
-
-    subTextEl.textContent = reasonText;
-
-    setFeedback("", "");
-    hideWrongFlash();
-
-    showFinishCard(reasonText, elapsedSec);
-
-    const accuracy = attempts === 0 ? 0 : Math.round((correct / attempts) * 100);
-    const slowestCorrect = computeSlowestCorrectTop3(correctTimes);
-
-    (async () => {
-      try{
-        const profile = getStoredProfile() || await ensureProfile();
-        if (attempts > 0){
-          const entry = normalizeEntry({
-            ts: Date.now(),
-            points,
-            attempts,
-            correct,
-            accuracy,
-            bestStreak,
-            maxFactor,
-            elapsedSec,
-            avgSec: attempts ? (elapsedSec / attempts) : 0,
-            reasonText,
-            mistakes,
-            slowestCorrect
-          });
-          await apiSubmitScore(profile, entry);
-        }
-      }catch{
-      }finally{
-        refreshMyScores().catch(() => {});
-      }
-    })();
-
-    unlockIdleUI();
-
-    startBtn.style.display = "none";
-    playAgainBtn.style.display = "block";
-    playAgainBtn.disabled = false;
-
-    updateUI();
-  }
-
-  function submitAnswer() {
-    if (!running || keypadLocked) return;
-    if (answerStr.trim() === "") return;
-
-    const userAnswer = Number(answerStr);
-    if (!Number.isFinite(userAnswer)) return;
-
-    const correctAnswer = a * b;
-    attempts += 1;
-
-    if (userAnswer === correctAnswer) {
-      correct += 1;
-
-      const now = performance.now();
-      const spent = currentProblemStartPerf ? Math.max(0, (now - currentProblemStartPerf) / 1000) : 0;
-      correctTimes.push({ a, b, correctAnswer, sec: spent });
-
-      const bonus = timeBonusPerCorrect();
-      time += bonus;
-
-      streak += 1;
-      if (streak > bestStreak) bestStreak = streak;
-
-      const stageIndex = stageIndexFromStreak(streak);
-      const mult = multiplierFromStageIndex(stageIndex);
-
-      const base = basePointsForProblem(a, b);
-      const gained = base * mult;
-
-      points += gained;
-
-      const bonusTxt = `+${fmtBonus(bonus)}s`;
-      const msg = `Korrekt, ${a} × ${b} = ${correctAnswer}`;
-      const tag = (mult === 1)
-        ? `+${gained} (base ${base}) • ${bonusTxt}`
-        : `+${gained} (${base}×x${mult}) • ${bonusTxt}`;
-
-      setFeedback("good", msg, tag);
-
-      updateUI();
-      newProblem();
-      return;
-    }
-
-    mistakes.push({ a, b, userAnswer, correctAnswer });
-
-    lives -= 1;
-    streak = 0;
-
-    setFeedback("bad", "Feil", "Du mister 1 liv");
-    showWrongFlash(correctAnswer);
-
-    if (lives <= 0) {
-      lives = 0;
-      updateUI();
-      setKeypadEnabled(false);
-      setTimeout(() => {
-        if (!running) return;
-        endGame("lives");
-      }, WRONG_PAUSE_MS);
-      return;
-    }
-
-    updateUI();
-    setKeypadEnabled(false);
-    setTimeout(() => {
-      if (!running) return;
-      setKeypadEnabled(true);
-      newProblem();
-      updateUI();
-    }, WRONG_PAUSE_MS);
-  }
-
+  // ========= Finish overlay =========
   function setActiveTab(which){
     tabSummary.classList.toggle("active", which === "summary");
     tabSlow.classList.toggle("active", which === "slow");
@@ -1757,6 +1585,7 @@
       </div>
     `;
 
+    // slowest
     slowListEl.innerHTML = "";
     const slow = Array.isArray(data.slowestCorrect) ? data.slowestCorrect : [];
     if (slow.length === 0){
@@ -1778,6 +1607,7 @@
       });
     }
 
+    // mistakes
     mistakesListEl.innerHTML = "";
     const list = Array.isArray(data.mistakes) ? data.mistakes : [];
     if (list.length === 0){
@@ -1829,6 +1659,7 @@
     updateUI();
   }
 
+  // ========= My scores =========
   let myScoresCache = [];
 
   function showMyScoresOverlay(){
@@ -1894,6 +1725,7 @@
     }
   }
 
+  // ========= Others =========
   let othersView = "class";
 
   function showOthersOverlay(){
@@ -1980,6 +1812,192 @@
     });
   }
 
+  // ========= Lifecycle =========
+  function resetAll() {
+    running = false;
+
+    time = 60.0;
+    points = 0;
+
+    attempts = 0;
+    correct = 0;
+
+    streak = 0;
+    bestStreak = 0;
+    lives = 3;
+
+    mistakes = [];
+    correctTimes = [];
+    currentProblemStartPerf = 0;
+
+    roundStartPerf = 0;
+    roundEndPerf = 0;
+
+    answerStr = "";
+    setKeypadEnabled(false);
+
+    problemTextEl.textContent = hasPlayedEver ? "Spill igjen" : "Trykk Start";
+    subTextEl.textContent = `Du har 60 sekunder og 3 liv. (1–${maxFactor})`;
+
+    setFeedback("", "");
+    hideWrongFlash();
+
+    diffButtons.forEach(b => b.disabled = false);
+    stopClock();
+
+    setStopKeyMode("idle");
+    updateUI();
+  }
+
+  function startGame() {
+    hideFinishOverlay();
+    hideMyScoresOverlay();
+    hideOthersOverlay();
+
+    resetAll();
+    running = true;
+    roundStartPerf = performance.now();
+
+    diffButtons.forEach(b => b.disabled = true);
+
+    setStopKeyMode("stop");
+    setKeypadEnabled(true);
+
+    newProblem();
+    updateUI();
+    startClock();
+  }
+
+  function endGame(reason) {
+    running = false;
+    hasPlayedEver = true;
+
+    setKeypadEnabled(false);
+    stopClock();
+
+    roundEndPerf = performance.now();
+    const elapsedSec = roundStartPerf ? Math.max(0, (roundEndPerf - roundStartPerf) / 1000) : 0;
+
+    problemTextEl.textContent = "Ferdig";
+    let reasonText = "Tiden er ute.";
+    if (reason === "lives") reasonText = "Du mistet alle liv.";
+    if (reason === "stop") reasonText = "Stoppa.";
+
+    subTextEl.textContent = reasonText;
+
+    setFeedback("", "");
+    hideWrongFlash();
+
+    showFinishCard(reasonText, elapsedSec);
+
+    const accuracy = attempts === 0 ? 0 : Math.round((correct / attempts) * 100);
+    const slowestCorrect = computeSlowestCorrectTop3(correctTimes);
+
+    (async () => {
+      try{
+        const profile = getStoredProfile() || await ensureProfile();
+        if (attempts > 0){
+          const entry = normalizeEntry({
+            ts: Date.now(),
+            points,
+            attempts,
+            correct,
+            accuracy,
+            bestStreak,
+            maxFactor,
+            elapsedSec,
+            avgSec: attempts ? (elapsedSec / attempts) : 0,
+            reasonText,
+            mistakes,
+            slowestCorrect
+          });
+          await apiSubmitScore(profile, entry);
+        }
+      }catch{
+      }finally{
+        refreshMyScores().catch(() => {});
+      }
+    })();
+
+    diffButtons.forEach(b => b.disabled = false);
+    setStopKeyMode("idle");
+    updateUI();
+  }
+
+  function submitAnswer() {
+    if (!running || keypadLocked) return;
+    if (answerStr.trim() === "") return;
+
+    const userAnswer = Number(answerStr);
+    if (!Number.isFinite(userAnswer)) return;
+
+    const correctAnswer = a * b;
+    attempts += 1;
+
+    if (userAnswer === correctAnswer) {
+      correct += 1;
+
+      const now = performance.now();
+      const spent = currentProblemStartPerf ? Math.max(0, (now - currentProblemStartPerf) / 1000) : 0;
+      correctTimes.push({ a, b, correctAnswer, sec: spent });
+
+      const bonus = timeBonusPerCorrect();
+      time += bonus;
+
+      streak += 1;
+      if (streak > bestStreak) bestStreak = streak;
+
+      const stageIndex = stageIndexFromStreak(streak);
+      const mult = multiplierFromStageIndex(stageIndex);
+
+      const base = basePointsForProblem(a, b);
+      const gained = base * mult;
+
+      points += gained;
+
+      const bonusTxt = `+${fmtBonus(bonus)}s`;
+      const msg = `Korrekt, ${a} × ${b} = ${correctAnswer}`;
+      const tag = (mult === 1)
+        ? `+${gained} (base ${base}) • ${bonusTxt}`
+        : `+${gained} (${base}×x${mult}) • ${bonusTxt}`;
+
+      setFeedback("good", msg, tag);
+
+      updateUI();
+      newProblem();
+      return;
+    }
+
+    mistakes.push({ a, b, userAnswer, correctAnswer });
+
+    lives -= 1;
+    streak = 0;
+
+    setFeedback("bad", "Feil", "Du mister 1 liv");
+    showWrongFlash(correctAnswer);
+
+    if (lives <= 0) {
+      lives = 0;
+      updateUI();
+      setKeypadEnabled(false);
+      setTimeout(() => {
+        if (!running) return;
+        endGame("lives");
+      }, WRONG_PAUSE_MS);
+      return;
+    }
+
+    updateUI();
+    setKeypadEnabled(false);
+    setTimeout(() => {
+      if (!running) return;
+      setKeypadEnabled(true);
+      newProblem();
+      updateUI();
+    }, WRONG_PAUSE_MS);
+  }
+
+  // ========= Events =========
   d5.addEventListener("click", () => { if (!running) setDifficulty(5); });
   d10.addEventListener("click", () => { if (!running) setDifficulty(10); });
   d12.addEventListener("click", () => { if (!running) setDifficulty(12); });
@@ -1990,24 +2008,10 @@
 
   answerBtn.addEventListener("click", submitAnswer);
 
-  startBtn.addEventListener("click", startGame);
-  playAgainBtn.addEventListener("click", startGame);
-
-  stopBtn.addEventListener("click", () => {
-    if (!running) return;
-    endGame("stop");
-  });
-
-  myScoresBtn.addEventListener("click", async () => {
-    if (running) return;
-    showMyScoresOverlay();
-    await refreshMyScores();
-  });
-
-  seeOthersBtn.addEventListener("click", async () => {
-    if (running) return;
-    showOthersOverlay();
-    await loadOthersScores("class");
+  stopKeyBtn.addEventListener("click", () => {
+    if (stopKeyBtn.disabled) return;
+    if (running) endGame("stop");
+    else startGame();
   });
 
   finishCloseBtn.addEventListener("click", hideFinishOverlay);
@@ -2040,20 +2044,20 @@
   });
   othersStartBtn.addEventListener("click", startGame);
 
-  [finishOverlay, myScoresOverlay, othersOverlay].forEach(ov => {
-    ov.addEventListener("click", (e) => { if (e.target === ov) ov.style.display = "none"; });
-  });
+  // Tap outside to close overlays
+  finishOverlay.addEventListener("click", (e) => { if (e.target === finishOverlay) hideFinishOverlay(); });
+  myScoresOverlay.addEventListener("click", (e) => { if (e.target === myScoresOverlay) hideMyScoresOverlay(); });
+  othersOverlay.addEventListener("click", (e) => { if (e.target === othersOverlay) hideOthersOverlay(); });
 
+  // ========= init =========
   document.getElementById("footerCopy").textContent =
     `© ${new Date().getFullYear()} Kristian Arntsen`;
 
   setDifficulty(10);
   resetAll();
 
-  startBtn.disabled = true;
-  playAgainBtn.disabled = true;
-  myScoresBtn.disabled = true;
-  seeOthersBtn.disabled = true;
+  // Disable Start/Stop until profile exists
+  stopKeyBtn.disabled = true;
 
   (async () => {
     try{
@@ -2067,11 +2071,8 @@
     }catch{
     }
 
-    startBtn.disabled = false;
-    playAgainBtn.disabled = false;
-    myScoresBtn.disabled = false;
-    seeOthersBtn.disabled = false;
-
+    stopKeyBtn.disabled = false;
+    setStopKeyMode("idle");
     refreshMyScores().catch(() => {});
   })();
 })();

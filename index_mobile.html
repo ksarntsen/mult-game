@@ -1,10 +1,9 @@
+<!-- index_mobile.html -->
 <!doctype html>
 <html lang="no">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
   <meta name="theme-color" content="#fb8500" />
   <title>1-minutts gangetrening (mobil)</title>
   <style>
@@ -16,126 +15,145 @@
       --muted:#6a4a00;
       --good:#1f8f3a;
       --bad:#d62828;
-      --border:rgba(42,27,0,.18);
-      --shadow:0 18px 50px rgba(60,30,0,.22);
+      --border:rgba(42,27,0,.16);
+      --shadow:0 18px 50px rgba(60,30,0,.18);
       --radius:18px;
       --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-
       --safeTop: env(safe-area-inset-top, 0px);
-      --safeBottom: env(safe-area-inset-bottom, 0px);
-      --safeLeft: env(safe-area-inset-left, 0px);
-      --safeRight: env(safe-area-inset-right, 0px);
-
-      --tap: 52px;         /* minimum tap target */
-      --inputH: 56px;
-      --bottomBarH: 86px;  /* actual height is + safe bottom */
+      --safeBot: env(safe-area-inset-bottom, 0px);
     }
 
-    *{ box-sizing:border-box; }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
     html, body{ height:100%; }
     body{
       margin:0;
-      min-height:100vh;
       font-family:var(--font);
       color:var(--text);
-      -webkit-text-size-adjust: 100%;
       background:
         radial-gradient(1100px 700px at 15% 15%, rgba(255,214,10,.85), transparent 60%),
         radial-gradient(1000px 650px at 85% 35%, rgba(251,133,0,.85), transparent 58%),
         radial-gradient(900px 600px at 55% 95%, rgba(255,183,3,.92), transparent 62%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
-      padding:
-        calc(10px + var(--safeTop))
-        calc(10px + var(--safeRight))
-        calc(var(--bottomBarH) + var(--safeBottom))
-        calc(10px + var(--safeLeft));
-      overflow-x:hidden;
+      overflow:hidden;
+      overscroll-behavior:none;
+      touch-action: manipulation;
     }
 
-    /* prevent iOS double-tap zoom on buttons */
-    button, input, select { touch-action: manipulation; }
-
-    .wrap{
-      width: min(720px, 100%);
+    .app{
+      height:100vh;
+      height:100dvh;
+      padding: calc(12px + var(--safeTop)) 12px calc(12px + var(--safeBot));
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-width: 760px;
       margin: 0 auto;
     }
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,247,219,.94));
+      flex:1;
+      min-height:0;
+      border-radius: 22px;
       border:1px solid var(--border);
       box-shadow: var(--shadow);
-      border-radius: var(--radius);
-      padding:14px;
-      position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,247,219,.95));
       overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      position:relative;
     }
 
     .card::before{
       content:"";
       position:absolute;
-      inset:-60px -60px auto auto;
-      width:220px;
-      height:220px;
+      inset:-70px -70px auto auto;
+      width:240px;
+      height:240px;
       border-radius:999px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,109,0,.35), rgba(255,109,0,0) 70%);
+      background: radial-gradient(circle at 30% 30%, rgba(255,109,0,.33), rgba(255,109,0,0) 72%);
       pointer-events:none;
     }
 
-    .top{
+    .hdr{
+      padding: 12px 12px 10px;
       display:flex;
       flex-direction:column;
       gap:10px;
-      align-items:stretch;
-      margin-bottom:10px;
     }
 
-    h1{
-      margin:0;
-      font-size:18px;
-      letter-spacing:.2px;
-      font-weight:950;
-      text-align:left;
+    .titleRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
     }
+
+    .title{
+      font-weight: 1000;
+      letter-spacing:.2px;
+      font-size: 16px;
+      line-height: 1.1;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .seg{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:nowrap;
+    }
+
+    .seg button{
+      border:1px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.80);
+      color: var(--text);
+      border-radius:999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 950;
+      box-shadow: 0 10px 18px rgba(60,30,0,.08);
+      user-select:none;
+      touch-action: manipulation;
+    }
+    .seg button:active{ transform: translateY(1px); }
+    .seg button.active{
+      background: linear-gradient(180deg, rgba(255,214,10,1), rgba(255,109,0,.92));
+      border-color: rgba(255,109,0,.70);
+    }
+    .seg button:disabled{ opacity:.55; }
 
     .stats{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:8px;
-      align-items:stretch;
     }
 
-    .pill{
+    .chip{
+      border:1px solid rgba(42,27,0,.14);
+      background: rgba(255,255,255,.78);
+      border-radius: 14px;
+      padding: 10px 10px;
+      font-size: 12px;
+      font-weight: 900;
       display:flex;
       align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:10px 10px;
-      border-radius:999px;
-      border:1px solid rgba(42,27,0,.18);
-      background: rgba(255,255,255,.78);
-      color:var(--muted);
-      font-size:13px;
-      font-weight:900;
-      box-shadow: 0 10px 18px rgba(60,30,0,.08);
-      min-height: 40px;
-    }
-
-    .pill strong{
-      color:var(--text);
-      font-weight:1100;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .pill.lives{
-      grid-column: 1 / -1;
-      gap:10px;
       justify-content:space-between;
-      padding:10px 14px;
+      box-shadow: 0 12px 22px rgba(60,30,0,.07);
+      user-select:none;
+    }
+    .chip strong{
+      font-variant-numeric: tabular-nums;
+      font-weight: 1100;
+      color: var(--text);
     }
 
-    .hearts{ display:flex; gap:6px; align-items:center; justify-content:center; }
+    .hearts{
+      display:flex; gap:4px; align-items:center; justify-content:flex-end;
+    }
     .heart{
-      font-size:18px;
+      font-size: 14px;
       line-height:1;
       opacity:.95;
       filter: drop-shadow(0 6px 10px rgba(60,30,0,.18));
@@ -143,17 +161,15 @@
       user-select:none;
     }
     .heart.off{
-      opacity:.20;
+      opacity:.22;
       transform: scale(.92);
       filter:none;
     }
 
-    /* TIME LOADER */
     .bar{
       height:10px;
-      width:100%;
       border-radius:999px;
-      border:1px solid rgba(42,27,0,.16);
+      border:1px solid rgba(42,27,0,.14);
       background: rgba(255,255,255,.75);
       overflow:hidden;
       box-shadow: 0 12px 22px rgba(60,30,0,.08);
@@ -167,33 +183,36 @@
       transition: transform .12s linear;
     }
 
-    /* COMBO LOADER */
-    .comboLoader{
-      margin-top:10px;
+    .combo{
       display:flex;
       flex-direction:column;
       gap:7px;
     }
-    .comboRow{
+    .comboTop{
       display:flex;
-      align-items:center;
+      align-items:baseline;
       justify-content:space-between;
-      gap:10px;
-      font-size:12px;
-      font-weight:950;
-      color:var(--muted);
+      font-size: 12px;
+      font-weight: 950;
+      color: var(--muted);
+      user-select:none;
       letter-spacing:.2px;
     }
-    .comboRow strong{
-      color:var(--text);
+    .comboTop strong{
+      color: var(--text);
       font-variant-numeric: tabular-nums;
+    }
+    .comboTop .note{
+      font-size: 12px;
+      font-weight: 950;
+      color: var(--muted);
+      margin-left:6px;
     }
 
     .comboBar{
       height:14px;
-      width:100%;
       border-radius:999px;
-      border:1px solid rgba(42,27,0,.16);
+      border:1px solid rgba(42,27,0,.14);
       background: rgba(255,255,255,.75);
       overflow:hidden;
       box-shadow: 0 12px 22px rgba(60,30,0,.08);
@@ -208,13 +227,11 @@
       height:100%;
       transform-origin:left;
     }
-
     .comboBase{
       transform: scaleX(1);
-      transition: background .15s ease, filter .15s ease;
       background: rgba(255,255,255,.75);
+      transition: background .15s ease, filter .15s ease;
     }
-
     .comboFill{
       transform: scaleX(0);
       transition: transform .18s ease, filter .18s ease, background .15s ease;
@@ -231,7 +248,6 @@
         drop-shadow(0 0 10px rgba(255,255,255,.95))
         drop-shadow(0 0 22px rgba(255,255,255,.55));
     }
-
     .max{
       background: linear-gradient(90deg,
         #ff004c, #ff7a00, #ffe600, #00d26a, #00b3ff, #7b2cff, #ff004c
@@ -243,191 +259,327 @@
         drop-shadow(0 0 24px rgba(0,179,255,.35))
         drop-shadow(0 0 28px rgba(255,0,76,.22));
     }
-
     @keyframes rainbowMove{
       from{ background-position: 0% 50%; }
       to{ background-position: 100% 50%; }
     }
 
-    .panel{
-      margin-top:12px;
-      border:1px solid rgba(42,27,0,.16);
-      background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,247,219,.80));
-      border-radius: var(--radius);
-      padding:14px;
-      box-shadow: 0 16px 30px rgba(60,30,0,.10);
-    }
-
-    /* GAME AREA */
-    .problem{
+    .main{
+      flex:1;
+      min-height:0;
       display:flex;
       flex-direction:column;
-      gap:10px;
-      align-items:stretch;
+      gap:8px;
+      padding: 6px 12px 10px;
+      align-items:center;
       justify-content:center;
-      min-height: 210px;
     }
 
-    .big{
-      font-size: clamp(44px, 10vw, 64px);
-      line-height:1.0;
-      font-weight:1200;
-      letter-spacing:.5px;
+    .problem{
+      font-size: clamp(32px, 7.2vw, 56px);
+      line-height:1.05;
+      font-weight: 1200;
+      letter-spacing: .4px;
       font-variant-numeric: tabular-nums;
       text-shadow: 0 10px 18px rgba(60,30,0,.10);
+      user-select:none;
       text-align:center;
-      padding: 6px 0;
     }
 
     .sub{
-      color:var(--muted);
-      font-size:13px;
-      font-weight:800;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+      user-select:none;
       text-align:center;
-      margin-top:-2px;
+      margin-top: -2px;
     }
 
-    .feedback{
-      font-size:15px;
-      font-weight:1000;
-      min-height:24px;
+    .answerDisplay{
+      width: min(520px, 100%);
+      border-radius: 18px;
+      border: 2px solid rgba(255,109,0,.35);
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 14px 25px rgba(60,30,0,.10);
+      padding: 12px 14px;
+      font-size: clamp(26px, 6vw, 40px);
+      font-weight: 1200;
+      letter-spacing:.3px;
+      font-variant-numeric: tabular-nums;
+      text-align:center;
+      user-select:none;
+      min-height: 56px;
       display:flex;
       align-items:center;
       justify-content:center;
-      gap:10px;
-      flex-wrap:wrap;
+    }
+    .answerDisplay.disabled{ opacity:.55; }
+
+    .hint{
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(106,74,0,.85);
+      user-select:none;
+      margin-top:-2px;
       text-align:center;
-      margin-top:2px;
+    }
+
+    .feedback{
+      min-height: 22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+      font-size: 13px;
+      font-weight: 1000;
+      user-select:none;
+      text-align:center;
     }
     .feedback .tag{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(42,27,0,.16);
-      background: rgba(255,255,255,.85);
-      font-size:12px;
-      color:var(--muted);
-      font-weight:950;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(42,27,0,.14);
+      background: rgba(255,255,255,.80);
+      color: var(--muted);
+      font-weight: 950;
+      font-size: 12px;
     }
     .feedback.good{ color: var(--good); }
     .feedback.bad{ color: var(--bad); }
 
-    .bigCorrect{
-      display:none;
-      margin: 6px auto 0 auto;
-      padding:12px 14px;
-      border-radius:16px;
-      border:2px solid rgba(214,40,40,.50);
-      background: rgba(214,40,40,.10);
-      color: var(--text);
-      font-weight:1200;
-      font-size: clamp(28px, 6.5vw, 44px);
-      line-height:1;
-      letter-spacing:.2px;
-      font-variant-numeric: tabular-nums;
-      box-shadow: 0 16px 30px rgba(214,40,40,.12);
-      text-align:center;
-      width: fit-content;
-      max-width: 100%;
-    }
-    .bigCorrect.show{
-      display:block;
-      animation: pop .12s ease-out;
-    }
-    @keyframes pop{
-      from{ transform: scale(.98); opacity:.0; }
-      to{ transform: scale(1); opacity:1; }
-    }
-
-    /* CONTROLS */
-    .controls{
+    .bottom{
+      padding: 0 12px 12px;
       display:flex;
       flex-direction:column;
       gap:10px;
     }
 
-    .diffWrap{ display:flex; flex-direction:column; gap:8px; }
-    .seg{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; }
+    .ctrlRow{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+    }
 
-    button{
-      border:2px solid rgba(42,27,0,.16);
+    .btn{
+      border:2px solid rgba(42,27,0,.14);
       background: rgba(255,255,255,.86);
       color: var(--text);
-      border-radius:14px;
-      padding:12px 12px;
-      font-size:15px;
-      font-weight:1100;
-      cursor:pointer;
-      transition: transform .05s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
-      width:100%;
+      border-radius: 16px;
+      padding: 12px 12px;
+      font-weight: 1100;
+      font-size: 14px;
       box-shadow: 0 16px 26px rgba(60,30,0,.10);
-      min-height: var(--tap);
+      user-select:none;
+      touch-action: manipulation;
+      flex:1;
     }
-    button:active{ transform: translateY(1px); }
-    button:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
+    .btn:active{ transform: translateY(1px); }
+    .btn:disabled{ opacity:.55; transform:none; }
 
-    .seg button{
-      padding:10px 10px;
-      font-size:13px;
-      font-weight:1100;
-      border-radius:999px;
-      box-shadow: 0 12px 22px rgba(60,30,0,.10);
-      min-height: 46px;
-    }
-    .seg button.active{
-      background: linear-gradient(180deg, rgba(255,214,10,1), rgba(255,109,0,.92));
-      border-color: rgba(255,109,0,.75);
-    }
-
-    button.primary{
+    .btn.primary{
       background: linear-gradient(180deg, rgba(255,214,10,.95), rgba(255,109,0,.85));
       border-color: rgba(255,109,0,.55);
       color:#2a1b00;
     }
-    button.danger{
+    .btn.danger{
       background: linear-gradient(180deg, rgba(214,40,40,.18), rgba(214,40,40,.10));
       border-color: rgba(214,40,40,.35);
     }
-
-    .divider{
-      height:1px;
-      background: rgba(42,27,0,.16);
-      margin:4px 0;
+    .btn.ghost{
+      background: rgba(255,255,255,.70);
+      border-color: rgba(42,27,0,.12);
+      flex:0 0 auto;
+      width: 92px;
+      padding: 12px 10px;
+      font-size: 13px;
     }
 
-    /* High scores */
-    .hiscore{
-      margin-top:4px;
-      padding:12px;
-      border-radius: var(--radius);
-      border:1px solid rgba(42,27,0,.16);
-      background: rgba(255,255,255,.84);
-      box-shadow: 0 18px 32px rgba(60,30,0,.08);
+    .keypad{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
     }
-    .hiscoreTop{
+
+    .key{
+      border:2px solid rgba(42,27,0,.14);
+      background: rgba(255,255,255,.88);
+      border-radius: 18px;
+      box-shadow: 0 16px 26px rgba(60,30,0,.10);
+      padding: 14px 10px;
+      font-weight: 1200;
+      font-size: 22px;
+      text-align:center;
+      user-select:none;
+      touch-action: manipulation;
+      min-height: 54px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .key:active{ transform: translateY(1px); }
+    .key:disabled{ opacity:.55; transform:none; }
+
+    .key.answer{
+      background: linear-gradient(180deg, rgba(255,214,10,.95), rgba(255,109,0,.85));
+      border-color: rgba(255,109,0,.55);
+      color:#2a1b00;
+      font-size: 18px;
+      letter-spacing:.2px;
+    }
+
+    .key.blank{
+      background: transparent;
+      border: 2px dashed rgba(42,27,0,.12);
+      box-shadow:none;
+      opacity:.4;
+    }
+
+    .footerCopy{
+      text-align:center;
+      color: rgba(42,27,0,.55);
+      font-weight: 900;
+      font-size: 11px;
+      letter-spacing:.2px;
+      user-select:none;
+      padding-top: 2px;
+    }
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 14px;
+      z-index: 999;
+    }
+
+    .modal{
+      width: min(760px, 100%);
+      max-height: min(86vh, 820px);
+      background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,247,219,.98));
+      border:1px solid rgba(42,27,0,.18);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .modalHdr{
+      padding: 12px 12px 10px;
       display:flex;
       align-items:baseline;
       justify-content:space-between;
       gap:10px;
-      margin-bottom:8px;
+      border-bottom: 1px solid rgba(42,27,0,.12);
+      background: rgba(255,255,255,.70);
     }
-    .hiscore h3{
+
+    .modalHdr h3{
       margin:0;
-      font-size:13px;
-      font-weight:1100;
+      font-size: 14px;
+      font-weight: 1100;
       letter-spacing:.2px;
     }
-    .hiscore small{
-      color:var(--muted);
-      font-weight:900;
-      font-size:12px;
+
+    .modalHdr .sub{
+      margin:0;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+      text-align:left;
     }
-    .hiscoreList{
+
+    .modalBody{
+      padding: 12px;
       display:flex;
       flex-direction:column;
-      gap:8px;
-      max-height:260px;
+      gap:10px;
+      min-height:0;
+      flex:1;
+    }
+
+    .tabs{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+    .tabs button{
+      border:1px solid rgba(42,27,0,.16);
+      background: rgba(255,255,255,.80);
+      color: var(--text);
+      border-radius:999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 950;
+      user-select:none;
+    }
+    .tabs button.active{
+      background: linear-gradient(180deg, rgba(255,214,10,1), rgba(255,109,0,.92));
+      border-color: rgba(255,109,0,.70);
+    }
+
+    .metaGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 360px){
+      .metaGrid{ grid-template-columns: 1fr; }
+      .btn.ghost{ width: 84px; }
+    }
+
+    .tile{
+      padding: 12px;
+      border-radius: 18px;
+      border:1px solid rgba(42,27,0,.12);
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 12px 22px rgba(60,30,0,.06);
+    }
+    .tile .k{
+      font-size: 11px;
+      font-weight: 1100;
+      letter-spacing:.2px;
+      text-transform:uppercase;
+      color: var(--muted);
+    }
+    .tile .v{
+      margin-top: 4px;
+      font-size: 22px;
+      font-weight: 1200;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+    .tile .s{
+      margin-top: 2px;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .scoreBig{
+      font-size: 44px;
+      font-weight: 1300;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 10px 18px rgba(60,30,0,.10);
+      user-select:none;
+    }
+
+    .list{
+      border:1px solid rgba(42,27,0,.12);
+      background: rgba(255,255,255,.82);
+      border-radius: 18px;
+      padding: 10px;
+      min-height: 0;
+      flex:1;
       overflow:auto;
-      padding-right:4px;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 12px 22px rgba(60,30,0,.06);
     }
 
     .row{
@@ -435,368 +587,132 @@
       grid-template-columns: 26px 1fr auto;
       gap:10px;
       align-items:center;
-      padding:10px 10px;
-      border-radius:14px;
-      border:1px solid rgba(42,27,0,.12);
-      background: rgba(255,247,219,.62);
-      cursor:pointer;
-      transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
-      min-height: 54px;
+      padding: 9px 10px;
+      border-radius: 16px;
+      border:1px solid rgba(42,27,0,.10);
+      background: rgba(255,247,219,.65);
+      user-select:none;
     }
+    .row + .row{ margin-top: 8px; }
     .row:active{ transform: translateY(1px); }
-    .row .rank{
-      font-weight:1100;
-      color:var(--muted);
-      font-variant-numeric: tabular-nums;
+
+    .rank{
       text-align:center;
+      font-weight: 1100;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
     }
-    .row .meta{
+
+    .rowMeta{
+      min-width:0;
       display:flex;
       flex-direction:column;
-      gap:2px;
-      min-width:0;
+      gap:3px;
     }
-    .row .meta .line1{
+
+    .line1{
       display:flex;
       gap:8px;
       align-items:baseline;
       min-width:0;
     }
-    .row .score{
-      font-weight:1200;
+    .score{
+      font-weight: 1200;
       font-variant-numeric: tabular-nums;
       white-space:nowrap;
     }
-    .row .date{
-      color:var(--muted);
-      font-weight:850;
-      font-size:12px;
+    .date{
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
       white-space:nowrap;
     }
-    .row .line2{
-      color:var(--muted);
-      font-weight:850;
-      font-size:12px;
+    .line2{
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .row .badge{
-      padding:6px 10px;
+
+    .badge{
+      padding: 6px 10px;
       border-radius:999px;
-      border:1px solid rgba(42,27,0,.14);
-      background: rgba(255,255,255,.75);
-      color:var(--muted);
-      font-weight:1100;
-      font-size:12px;
+      border:1px solid rgba(42,27,0,.12);
+      background: rgba(255,255,255,.80);
+      color: var(--muted);
+      font-weight: 1100;
+      font-size: 12px;
       white-space:nowrap;
       font-variant-numeric: tabular-nums;
     }
+
     .empty{
-      color:var(--muted);
-      font-weight:900;
-      font-size:12px;
-      padding:10px 2px;
-      text-align:center;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+      padding: 8px 2px;
     }
 
-    /* FINISH SUMMARY */
-    .finishCard{
-      display:none;
-      width:100%;
-      margin-top:10px;
-      padding:14px;
-      border-radius:18px;
-      border:1px solid rgba(42,27,0,.16);
-      background: rgba(255,255,255,.90);
-      box-shadow: 0 18px 32px rgba(60,30,0,.10);
-    }
-    .finishCard.show{ display:block; animation: pop .12s ease-out; }
-
-    .finishTitle{
+    .modalFtr{
+      padding: 10px 12px 12px;
       display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:6px;
-    }
-    .finishTitle h2{
-      margin:0;
-      font-size:18px;
-      font-weight:1200;
-      letter-spacing:.2px;
-    }
-    .finishTitle .reason{
-      color:var(--muted);
-      font-weight:950;
-      font-size:12px;
-      white-space:nowrap;
-    }
-    .finishScore{
-      font-size:44px;
-      font-weight:1300;
-      line-height:1;
-      margin:6px 0 10px 0;
-      font-variant-numeric: tabular-nums;
-      text-shadow: 0 10px 18px rgba(60,30,0,.10);
-      text-align:center;
-    }
-    .tiny{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:900;
-      text-align:center;
-    }
-    .finishMeta{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin-top:6px;
-    }
-    @media (max-width: 380px){
-      .finishMeta{ grid-template-columns:1fr; }
-    }
-    .metaTile{
-      padding:12px;
-      border-radius:16px;
-      border:1px solid rgba(42,27,0,.14);
-      background: rgba(255,247,219,.55);
-    }
-    .metaTile .k{
-      font-size:11px;
-      color:var(--muted);
-      font-weight:1100;
-      letter-spacing:.2px;
-      text-transform:uppercase;
-    }
-    .metaTile .v{
-      margin-top:4px;
-      font-size:20px;
-      font-weight:1300;
-      color:var(--text);
-      font-variant-numeric: tabular-nums;
-    }
-    .metaTile .s{
-      margin-top:2px;
-      font-size:12px;
-      color:var(--muted);
-      font-weight:900;
-    }
-
-    .boxBig{
-      margin-top:10px;
-      padding:12px;
-      border-radius:18px;
-      border:1px solid rgba(42,27,0,.14);
-      background: rgba(255,255,255,.88);
-      box-shadow: 0 14px 24px rgba(60,30,0,.06);
-    }
-    .boxBig h3{
-      margin:0 0 10px 0;
-      font-size:12px;
-      font-weight:1200;
-      color:var(--muted);
-      letter-spacing:.2px;
-      text-transform:uppercase;
-    }
-    .boxBigEmpty{
-      font-size:13px;
-      color:var(--muted);
-      font-weight:950;
-      text-align:center;
-    }
-    .boxBigList{
-      margin:0;
-      padding-left:18px;
-      display:flex;
-      flex-direction:column;
       gap:8px;
-      max-height:200px;
-      overflow:auto;
-    }
-    .boxBigList li{
-      font-size:14px;
-      color:var(--text);
-      font-weight:1000;
-      line-height:1.25;
-    }
-    .boxBigList .muted{
-      color:var(--muted);
-      font-weight:900;
+      border-top: 1px solid rgba(42,27,0,.12);
+      background: rgba(255,255,255,.70);
     }
 
-    /* MODALS */
-    .modalOverlay{
-      position:fixed;
-      inset:0;
-      background: rgba(0,0,0,.45);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:
-        calc(14px + var(--safeTop))
-        calc(14px + var(--safeRight))
-        calc(14px + var(--safeBottom))
-        calc(14px + var(--safeLeft));
-      z-index:999;
-    }
-    .modalCard{
-      width: min(760px, 100%);
-      max-height: min(86vh, 820px);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,247,219,.99));
-      border:1px solid rgba(42,27,0,.18);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding:14px;
-      overflow:hidden;
-    }
-    .modalTop{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .modalTop h3{
-      margin:0;
-      font-size:14px;
-      font-weight:1200;
-      letter-spacing:.2px;
-    }
-    .modalSub{
-      color:var(--muted);
-      font-weight:900;
-      font-size:12px;
-      margin-top:-4px;
-    }
-    .smallBtn{
-      width:auto;
-      padding:10px 12px;
-      font-size:13px;
-      border-radius:999px;
-      box-shadow: 0 12px 22px rgba(60,30,0,.10);
-      min-height: 42px;
-    }
+    .modalFtr .btn{ box-shadow: 0 12px 22px rgba(60,30,0,.08); }
 
-    .profileForm{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      align-items:stretch;
-      padding:10px 0 0 0;
-    }
-    .profileForm label{
-      font-size:13px;
-      font-weight:1000;
-      color:var(--muted);
-    }
-    .profileForm .formGroup{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    input[type="text"], select{
-      width:100%;
-      padding:14px 14px;
-      font-size:18px; /* keeps iOS from zooming (>=16px) */
-      border-radius:14px;
-      outline:none;
-      border:2px solid rgba(255,109,0,.35);
-      background: rgba(255,255,255,.95);
-      color: var(--text);
-      font-weight:1000;
-      letter-spacing:.2px;
-      box-shadow: 0 14px 25px rgba(60,30,0,.10);
-      min-height: var(--inputH);
-    }
-    input[type="text"]:focus, select:focus{
-      border-color: rgba(255,109,0,.75);
-      box-shadow: 0 18px 28px rgba(255,109,0,.20);
-    }
-    select{
-      cursor:pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      padding-right: 36px;
-    }
-
-    /* BOTTOM ANSWER BAR */
-    .bottomBar{
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      padding:
-        10px
-        calc(12px + var(--safeRight))
-        calc(10px + var(--safeBottom))
-        calc(12px + var(--safeLeft));
-      background: rgba(255,247,219,.92);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(42,27,0,.14);
-      box-shadow: 0 -18px 30px rgba(60,30,0,.10);
-      z-index: 500;
-    }
-
-    .bottomInner{
-      width: min(720px, 100%);
-      margin: 0 auto;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-
-    #answerInput{
-      flex: 1;
-      min-width: 0;
-      height: var(--inputH);
-      font-size: 20px; /* still >=16 for iOS zoom prevention */
+    .flash{
+      position:absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      transform: translateY(120%);
+      opacity:0;
+      pointer-events:none;
       padding: 12px 14px;
-      border-radius: 16px;
-      border: 2px solid rgba(255,109,0,.35);
-      background: rgba(255,255,255,.98);
+      border-radius: 18px;
+      border:2px solid rgba(214,40,40,.45);
+      background: rgba(214,40,40,.10);
+      box-shadow: 0 16px 30px rgba(214,40,40,.12);
       font-weight: 1200;
-      box-shadow: 0 14px 25px rgba(60,30,0,.10);
-    }
-    #answerInput:disabled{ opacity:.55; }
-
-    #submitBtn{
-      width: 120px;
-      height: var(--inputH);
-      border-radius: 16px;
-      font-size: 16px;
-      font-weight: 1200;
-    }
-
-    .footer{
-      margin-top:10px;
+      font-size: 22px;
       text-align:center;
-      color:rgba(42,27,0,.55);
-      font-weight:900;
-      font-size:12px;
-      letter-spacing:.2px;
+      transition: transform .12s ease, opacity .12s ease;
       user-select:none;
+    }
+    .flash.show{
+      transform: translateY(0%);
+      opacity:1;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{ animation:none !important; transition:none !important; }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="app">
     <div class="card" role="application" aria-label="Gangetrening mobil">
-      <div class="top">
-        <h1>1-minutts gangetrening</h1>
+      <div class="hdr">
+        <div class="titleRow">
+          <div class="title">1-minutts gangetrening</div>
+          <div class="seg" role="group" aria-label="Tabellvalg">
+            <button id="d5" type="button">1–5</button>
+            <button id="d10" type="button" class="active">1–10</button>
+            <button id="d12" type="button">1–12</button>
+          </div>
+        </div>
 
-        <div class="stats" aria-label="Statistikk">
-          <div class="pill">Tid: <strong id="timeLeft">60.0</strong>s</div>
-          <div class="pill">Poeng: <strong id="points">0</strong></div>
-          <div class="pill">Streak: <strong id="streak">0</strong></div>
-          <div class="pill lives">
-            <span>Liv</span>
+        <div class="stats" aria-label="Status">
+          <div class="chip">Tid <strong id="timeLeft">60.0</strong>s</div>
+          <div class="chip">Poeng <strong id="points">0</strong></div>
+          <div class="chip">Streak <strong id="streak">0</strong></div>
+          <div class="chip">
+            Liv
             <span class="hearts" id="hearts" aria-label="Liv">
               <span class="heart">♥</span>
               <span class="heart">♥</span>
@@ -804,147 +720,180 @@
             </span>
           </div>
         </div>
-      </div>
 
-      <div class="bar" aria-hidden="true"><div id="timeBar"></div></div>
+        <div class="bar" aria-hidden="true"><div id="timeBar"></div></div>
 
-      <div class="comboLoader" aria-label="Kombo-fremdrift">
-        <div class="comboRow">
-          <span>Kombo</span>
-          <span><strong id="comboLabel">x1</strong> <span class="tiny" id="comboNote"></span></span>
-        </div>
-        <div class="comboBar" aria-hidden="true">
-          <div id="comboBase" class="comboBase"></div>
-          <div id="comboFill" class="comboFill stage1"></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="problem">
-          <div class="big" id="problemText">Trykk Start</div>
-          <div class="sub" id="subText">Du har 60 sekunder og 3 liv.</div>
-
-          <div class="feedback" id="feedback" aria-live="polite"></div>
-          <div id="bigCorrect" class="bigCorrect" aria-live="polite"></div>
-
-          <div class="finishCard" id="finishCard" aria-label="Oppsummering">
-            <div class="finishTitle">
-              <h2>Ferdig</h2>
-              <div class="reason" id="finishReason"></div>
-            </div>
-
-            <div class="tiny">Du fikk:</div>
-            <div class="finishScore"><span id="finishPoints">0</span> poeng</div>
-
-            <div class="finishMeta" id="finishMeta"></div>
-
-            <div class="boxBig" id="slowBoxBig">
-              <h3>Tregeste korrekte (topp 3)</h3>
-              <div id="slowBigEmpty" class="boxBigEmpty" style="display:none;"></div>
-              <ol id="slowBigList" class="boxBigList"></ol>
-            </div>
-
-            <div class="boxBig" id="mistakesBoxBig">
-              <h3>Feil og riktige svar</h3>
-              <div id="mistakesBigEmpty" class="boxBigEmpty" style="display:none;"></div>
-              <ol id="mistakesBigList" class="boxBigList"></ol>
-            </div>
+        <div class="combo" aria-label="Kombo-fremdrift">
+          <div class="comboTop">
+            <span>Kombo</span>
+            <span><strong id="comboLabel">x1</strong><span class="note" id="comboNote"></span></span>
+          </div>
+          <div class="comboBar" aria-hidden="true">
+            <div id="comboBase" class="comboBase"></div>
+            <div id="comboFill" class="comboFill stage1"></div>
           </div>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="controls">
-          <div class="diffWrap" aria-label="Velg nivå">
-            <div class="seg" role="group" aria-label="Tabellvalg">
-              <button id="d5" type="button">1–5</button>
-              <button id="d10" type="button" class="active">1–10</button>
-              <button id="d12" type="button">1–12</button>
-            </div>
-          </div>
+      <div class="main">
+        <div class="problem" id="problemText">Trykk Start</div>
+        <div class="sub" id="subText">Du har 60 sekunder og 3 liv.</div>
 
-          <button class="primary" id="startBtn">Start</button>
-          <button id="playAgainBtn" style="display:none;">Spill igjen</button>
+        <div id="answerDisplay" class="answerDisplay disabled" role="button" aria-label="Svar">—</div>
+        <div class="hint" id="answerHint">Trykk på svaret for å slette • hold for å tømme</div>
 
-          <div class="divider"></div>
-
-          <button class="danger" id="stopBtn" disabled>Stopp</button>
-
-          <div class="hiscore" aria-label="Highscore">
-            <div class="hiscoreTop">
-              <h3>Highscore</h3>
-              <small>Dine topp 10 (trykk på en rad)</small>
-            </div>
-            <div id="hiscoreList" class="hiscoreList"></div>
-            <div id="hiscoreEmpty" class="empty" style="display:none;">Ingen runder lagret ennå.</div>
-            <button id="seeOthersBtn" type="button" style="margin-top:10px;">Se andres high scores</button>
-          </div>
-        </div>
+        <div class="feedback" id="feedback" aria-live="polite"></div>
       </div>
-    </div>
 
-    <div class="footer" id="footerCopy"></div>
-  </div>
+      <div class="bottom">
+        <div class="ctrlRow" aria-label="Kontroller">
+          <button id="startBtn" class="btn primary" type="button">Start</button>
+          <button id="playAgainBtn" class="btn primary" type="button" style="display:none;">Spill igjen</button>
+          <button id="stopBtn" class="btn danger" type="button" disabled>Stopp</button>
+          <button id="myScoresBtn" class="btn ghost" type="button">Mine</button>
+          <button id="seeOthersBtn" class="btn ghost" type="button">Andre</button>
+        </div>
 
-  <!-- Bottom answer bar -->
-  <div class="bottomBar" aria-label="Svarlinje">
-    <div class="bottomInner">
-      <input
-        id="answerInput"
-        type="text"
-        inputmode="numeric"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-        placeholder="Svar"
-        disabled
-        aria-label="Svarfelt"
-      />
-      <button id="submitBtn" class="primary" type="button" disabled>Svar</button>
+        <div class="keypad" aria-label="Talltastatur">
+          <button class="key" type="button" data-digit="1">1</button>
+          <button class="key" type="button" data-digit="2">2</button>
+          <button class="key" type="button" data-digit="3">3</button>
+
+          <button class="key" type="button" data-digit="4">4</button>
+          <button class="key" type="button" data-digit="5">5</button>
+          <button class="key" type="button" data-digit="6">6</button>
+
+          <button class="key" type="button" data-digit="7">7</button>
+          <button class="key" type="button" data-digit="8">8</button>
+          <button class="key" type="button" data-digit="9">9</button>
+
+          <div class="key blank" aria-hidden="true"></div>
+          <button class="key" type="button" data-digit="0">0</button>
+          <button id="answerBtn" class="key answer" type="button">Svar</button>
+        </div>
+
+        <div class="footerCopy" id="footerCopy"></div>
+      </div>
+
+      <div id="wrongFlash" class="flash" aria-live="polite"></div>
     </div>
   </div>
 
-  <!-- Others modal -->
-  <div id="othersModal" class="modalOverlay" style="display:none;">
-    <div class="modalCard" role="dialog" aria-modal="true" aria-label="Andres highscore">
-      <div class="modalTop">
+  <div id="finishOverlay" class="overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Oppsummering">
+      <div class="modalHdr">
         <div>
-          <h3 id="othersTitle">Andres highscores</h3>
-          <div id="othersSub" class="modalSub"></div>
+          <h3>Ferdig</h3>
+          <div class="sub" id="finishReason"></div>
         </div>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <button id="othersToggleBtn" type="button" class="smallBtn">Se alle klassene</button>
-          <button id="closeOthersBtn" type="button" class="smallBtn">Lukk</button>
+        <button id="finishCloseBtn" class="btn ghost" type="button" style="width:auto;">Lukk</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="scoreBig"><span id="finishPoints">0</span> poeng</div>
+
+        <div class="tabs" role="tablist" aria-label="Oppsummering">
+          <button id="tabSummary" type="button" class="active">Oppsummering</button>
+          <button id="tabSlow" type="button">Tregeste</button>
+          <button id="tabMistakes" type="button">Feil</button>
+        </div>
+
+        <div id="panelSummary" style="display:block; min-height:0;">
+          <div class="metaGrid" id="finishMeta"></div>
+        </div>
+
+        <div id="panelSlow" style="display:none; min-height:0; flex:1;">
+          <div class="list" id="slowList"></div>
+          <div class="empty" id="slowEmpty" style="display:none;">Ingen data.</div>
+        </div>
+
+        <div id="panelMistakes" style="display:none; min-height:0; flex:1;">
+          <div class="list" id="mistakesList"></div>
+          <div class="empty" id="mistakesEmpty" style="display:none;">Ingen feil i denne runden.</div>
         </div>
       </div>
-      <div id="othersList" class="hiscoreList modalList"></div>
-      <div id="othersEmpty" class="empty" style="display:none;">Ingen runder lagret ennå.</div>
+
+      <div class="modalFtr">
+        <button id="finishPlayAgainBtn" class="btn primary" type="button">Spill igjen</button>
+        <button id="finishMyScoresBtn" class="btn" type="button">Mine highscores</button>
+      </div>
     </div>
   </div>
 
-  <!-- Profile modal -->
-  <div id="profileModal" class="modalOverlay" style="display:none;">
-    <div class="modalCard" role="dialog" aria-modal="true" aria-label="Registrer deg">
-      <div class="modalTop">
-        <h3>Registrer deg</h3>
+  <div id="myScoresOverlay" class="overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Mine highscores">
+      <div class="modalHdr">
+        <div>
+          <h3>Highscore</h3>
+          <div class="sub">Dine topp 10 (trykk på en rad)</div>
+        </div>
+        <button id="myScoresCloseBtn" class="btn ghost" type="button" style="width:auto;">Lukk</button>
       </div>
-      <form id="profileForm" class="profileForm">
-        <div class="formGroup">
-          <label for="profileNameInput">Skriv inn navnet ditt:</label>
-          <input type="text" id="profileNameInput" placeholder="Navn" required maxlength="40" autocomplete="off" />
+      <div class="modalBody">
+        <div class="list" id="myScoresList"></div>
+        <div class="empty" id="myScoresEmpty" style="display:none;">Ingen runder lagret ennå.</div>
+      </div>
+      <div class="modalFtr">
+        <button id="myScoresSeeOthersBtn" class="btn" type="button">Se andres</button>
+        <button id="myScoresStartBtn" class="btn primary" type="button">Start</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="othersOverlay" class="overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Andres highscores">
+      <div class="modalHdr">
+        <div>
+          <h3>Andres highscores</h3>
+          <div class="sub" id="othersSub"></div>
         </div>
-        <div class="formGroup">
-          <label for="profileClassSelect">Velg klassen din:</label>
-          <select id="profileClassSelect" required>
-            <option value="" disabled selected>Velg klasse...</option>
-            <option value="8A">8A</option><option value="8B">8B</option><option value="8C">8C</option><option value="8D">8D</option>
-            <option value="9A">9A</option><option value="9B">9B</option><option value="9C">9C</option><option value="9D">9D</option><option value="9E">9E</option>
-            <option value="10A">10A</option><option value="10B">10B</option><option value="10C">10C</option><option value="10D">10D</option><option value="10E">10E</option>
-          </select>
+        <button id="othersCloseBtn" class="btn ghost" type="button" style="width:auto;">Lukk</button>
+      </div>
+      <div class="modalBody">
+        <div class="tabs">
+          <button id="othersToggleBtn" type="button" class="active">Min klasse</button>
+          <button id="othersToggleBtn2" type="button">Alle klasser</button>
         </div>
-        <button type="submit" class="primary">Lagre</button>
-      </form>
+        <div class="list" id="othersList"></div>
+        <div class="empty" id="othersEmpty" style="display:none;">Ingen runder lagret ennå.</div>
+      </div>
+      <div class="modalFtr">
+        <button id="othersBackToMineBtn" class="btn" type="button">Mine highscores</button>
+        <button id="othersStartBtn" class="btn primary" type="button">Start</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="profileOverlay" class="overlay" aria-hidden="true" style="display:flex;">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Registrer deg">
+      <div class="modalHdr">
+        <div>
+          <h3>Registrer deg</h3>
+          <div class="sub">Navn og klasse lagres lokalt, og brukes på highscores.</div>
+        </div>
+      </div>
+      <div class="modalBody">
+        <form id="profileForm" style="display:flex; flex-direction:column; gap:10px;">
+          <div class="tile">
+            <div class="k">Navn</div>
+            <input id="profileNameInput" type="text" autocomplete="off" maxlength="40" required
+              style="width:100%; margin-top:6px; padding:12px 12px; font-size:16px; font-weight:950; border-radius:14px; border:2px solid rgba(255,109,0,.35); background: rgba(255,255,255,.92); outline:none;" />
+          </div>
+
+          <div class="tile">
+            <div class="k">Klasse</div>
+            <select id="profileClassSelect" required
+              style="width:100%; margin-top:6px; padding:12px 12px; font-size:16px; font-weight:950; border-radius:14px; border:2px solid rgba(255,109,0,.35); background: rgba(255,255,255,.92); outline:none; appearance:none;">
+              <option value="" disabled selected>Velg klasse…</option>
+              <option value="8A">8A</option><option value="8B">8B</option><option value="8C">8C</option><option value="8D">8D</option>
+              <option value="9A">9A</option><option value="9B">9B</option><option value="9C">9C</option><option value="9D">9D</option><option value="9E">9E</option>
+              <option value="10A">10A</option><option value="10B">10B</option><option value="10C">10C</option><option value="10D">10D</option><option value="10E">10E</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn primary" style="width:100%;">Lagre</button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -965,32 +914,22 @@
   let a = 0;
   let b = 0;
 
-  const WRONG_PAUSE_MS = 1300;
   let maxFactor = 10;
 
-  // Round timing + mistakes
+  const WRONG_PAUSE_MS = 1300;
+
+  let answerStr = "";
+  let keypadLocked = true;
+
   let roundStartPerf = 0;
   let roundEndPerf = 0;
-  let mistakes = []; // {a,b,userAnswer,correctAnswer}
+  let mistakes = [];
 
-  // Per-problem timing
   let currentProblemStartPerf = 0;
-  let correctTimes = []; // {a,b,correctAnswer,sec}
+  let correctTimes = [];
 
   let rafId = null;
   let lastNow = 0;
-
-  // Mobile: keep input focused while running (helps snappy play)
-  function safeFocusAnswer(){
-    if (!running) return;
-    if (answerInput.disabled) return;
-    // avoid fighting with modals
-    if (profileModal.style.display === "flex") return;
-    if (othersModal.style.display === "flex") return;
-    requestAnimationFrame(() => {
-      try { answerInput.focus({ preventScroll: true }); } catch { try { answerInput.focus(); } catch {} }
-    });
-  }
 
   function timeBonusPerCorrect(){
     if (maxFactor <= 5) return 0.4;
@@ -1073,12 +1012,10 @@
     return copy.slice(0, 3);
   }
 
-  // ========= Highscores (Netlify DB) =========
   const LS_PROFILE_KEY = "multTrainerProfileV1";
   const MAX_SCORES = 10;
 
   function pad2(n){ return String(n).padStart(2, "0"); }
-
   function fmtDate(ts){
     const d = new Date(ts);
     return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${String(d.getFullYear()).slice(-2)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
@@ -1163,41 +1100,41 @@
     return "p_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
   }
 
-  async function ensureProfileAfterFirstGame(){
+  async function ensureProfile(){
     let p = getStoredProfile();
     if (!p) p = { playerId: makePlayerId(), name: "", className: "" };
     if (!p.playerId) p.playerId = makePlayerId();
 
-    if (!p.name || !p.className){
-      // Reset form
-      profileNameInput.value = p.name || "";
-      profileClassSelect.value = p.className || "";
+    const overlay = document.getElementById("profileOverlay");
+    const form = document.getElementById("profileForm");
+    const nameInput = document.getElementById("profileNameInput");
+    const classSelect = document.getElementById("profileClassSelect");
 
-      profileModal.style.display = "flex";
-      document.body.style.overflow = "hidden";
-      setTimeout(() => {
-        try { profileNameInput.focus({ preventScroll: true }); } catch { try { profileNameInput.focus(); } catch {} }
-      }, 0);
+    nameInput.value = p.name || "";
+    classSelect.value = p.className || "";
 
-      const result = await new Promise((resolve) => {
-        const handleSubmit = (e) => {
-          e.preventDefault();
-          const name = profileNameInput.value.trim();
-          const className = profileClassSelect.value;
-          if (name && className) {
-            profileForm.removeEventListener("submit", handleSubmit);
-            profileModal.style.display = "none";
-            document.body.style.overflow = "";
-            resolve({ name, className });
-          }
-        };
-        profileForm.addEventListener("submit", handleSubmit);
-      });
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden", "false");
 
-      p.name = result.name.slice(0, 40);
-      p.className = result.className.slice(0, 40);
-      saveProfile(p);
-    }
+    const result = await new Promise((resolve) => {
+      const onSubmit = (e) => {
+        e.preventDefault();
+        const name = nameInput.value.trim();
+        const className = classSelect.value;
+        if (name && className){
+          form.removeEventListener("submit", onSubmit);
+          resolve({ name, className });
+        }
+      };
+      form.addEventListener("submit", onSubmit);
+    });
+
+    p.name = result.name.slice(0, 40);
+    p.className = result.className.slice(0, 40);
+    saveProfile(p);
+
+    overlay.style.display = "none";
+    overlay.setAttribute("aria-hidden", "true");
 
     return p;
   }
@@ -1257,44 +1194,28 @@
     return Array.isArray(data) ? data : [];
   }
 
-  let myScoresCache = [];
-
-  async function refreshMyScores(){
-    const p = getStoredProfile();
-    if (!p || !p.playerId){
-      myScoresCache = [];
-      renderMyScores([]);
-      return;
-    }
-
-    try{
-      const list = await apiGetMyScores(p.playerId);
-      myScoresCache = list.map(normalizeEntry);
-      renderMyScores(myScoresCache);
-    }catch(e){
-      console.warn("Kunne ikke hente highscores", e);
-      myScoresCache = [];
-      renderMyScores([]);
-      hiscoreEmptyEl.style.display = "block";
-      hiscoreEmptyEl.textContent = "Får ikke kontakt med serveren.";
-    }
+  function isRealClassName(x){
+    const s = String(x || "").trim();
+    if (!s) return false;
+    return s.toLowerCase() !== "ukjent";
   }
 
-  // ========= UI refs =========
   const timeLeftEl = document.getElementById("timeLeft");
   const pointsEl = document.getElementById("points");
-  const timeBar = document.getElementById("timeBar");
+  const timeBarEl = document.getElementById("timeBar");
 
   const streakEl = document.getElementById("streak");
   const heartsEl = document.getElementById("hearts");
 
-  const problemText = document.getElementById("problemText");
-  const subText = document.getElementById("subText");
-  const answerInput = document.getElementById("answerInput");
-  const submitBtn = document.getElementById("submitBtn");
+  const problemTextEl = document.getElementById("problemText");
+  const subTextEl = document.getElementById("subText");
+
+  const answerDisplayEl = document.getElementById("answerDisplay");
+  const answerHintEl = document.getElementById("answerHint");
+  const answerBtn = document.getElementById("answerBtn");
 
   const feedbackEl = document.getElementById("feedback");
-  const bigCorrectEl = document.getElementById("bigCorrect");
+  const wrongFlashEl = document.getElementById("wrongFlash");
 
   const comboLabelEl = document.getElementById("comboLabel");
   const comboNoteEl = document.getElementById("comboNote");
@@ -1302,262 +1223,56 @@
   const comboFillEl = document.getElementById("comboFill");
 
   const startBtn = document.getElementById("startBtn");
-  const stopBtn = document.getElementById("stopBtn");
   const playAgainBtn = document.getElementById("playAgainBtn");
+  const stopBtn = document.getElementById("stopBtn");
 
-  const hiscoreListEl = document.getElementById("hiscoreList");
-  const hiscoreEmptyEl = document.getElementById("hiscoreEmpty");
-
+  const myScoresBtn = document.getElementById("myScoresBtn");
   const seeOthersBtn = document.getElementById("seeOthersBtn");
-  const othersModal = document.getElementById("othersModal");
-  const othersTitleEl = document.getElementById("othersTitle");
-  const othersSubEl = document.getElementById("othersSub");
-  const othersToggleBtn = document.getElementById("othersToggleBtn");
-  const closeOthersBtn = document.getElementById("closeOthersBtn");
-  const othersListEl = document.getElementById("othersList");
-  const othersEmptyEl = document.getElementById("othersEmpty");
-
-  const profileModal = document.getElementById("profileModal");
-  const profileForm = document.getElementById("profileForm");
-  const profileNameInput = document.getElementById("profileNameInput");
-  const profileClassSelect = document.getElementById("profileClassSelect");
 
   const d5 = document.getElementById("d5");
   const d10 = document.getElementById("d10");
   const d12 = document.getElementById("d12");
   const diffButtons = [d5, d10, d12];
 
-  // Finish card refs
-  const finishCardEl = document.getElementById("finishCard");
+  const finishOverlay = document.getElementById("finishOverlay");
+  const finishCloseBtn = document.getElementById("finishCloseBtn");
+  const finishPlayAgainBtn = document.getElementById("finishPlayAgainBtn");
+  const finishMyScoresBtn = document.getElementById("finishMyScoresBtn");
+
   const finishReasonEl = document.getElementById("finishReason");
   const finishPointsEl = document.getElementById("finishPoints");
   const finishMetaEl = document.getElementById("finishMeta");
 
-  const slowBigListEl = document.getElementById("slowBigList");
-  const slowBigEmptyEl = document.getElementById("slowBigEmpty");
+  const tabSummary = document.getElementById("tabSummary");
+  const tabSlow = document.getElementById("tabSlow");
+  const tabMistakes = document.getElementById("tabMistakes");
+  const panelSummary = document.getElementById("panelSummary");
+  const panelSlow = document.getElementById("panelSlow");
+  const panelMistakes = document.getElementById("panelMistakes");
+  const slowListEl = document.getElementById("slowList");
+  const slowEmptyEl = document.getElementById("slowEmpty");
+  const mistakesListEl = document.getElementById("mistakesList");
+  const mistakesEmptyEl = document.getElementById("mistakesEmpty");
 
-  const mistakesBigListEl = document.getElementById("mistakesBigList");
-  const mistakesBigEmptyEl = document.getElementById("mistakesBigEmpty");
+  const myScoresOverlay = document.getElementById("myScoresOverlay");
+  const myScoresCloseBtn = document.getElementById("myScoresCloseBtn");
+  const myScoresListEl = document.getElementById("myScoresList");
+  const myScoresEmptyEl = document.getElementById("myScoresEmpty");
+  const myScoresSeeOthersBtn = document.getElementById("myScoresSeeOthersBtn");
+  const myScoresStartBtn = document.getElementById("myScoresStartBtn");
 
-  // ========= Highscore render + click -> summary =========
-  function renderMyScores(list){
-    hiscoreListEl.innerHTML = "";
-    if (!list || list.length === 0){
-      hiscoreEmptyEl.style.display = "block";
-      hiscoreEmptyEl.textContent = "Ingen runder lagret ennå.";
-      return;
-    }
-    hiscoreEmptyEl.style.display = "none";
+  const othersOverlay = document.getElementById("othersOverlay");
+  const othersCloseBtn = document.getElementById("othersCloseBtn");
+  const othersSubEl = document.getElementById("othersSub");
+  const othersListEl = document.getElementById("othersList");
+  const othersEmptyEl = document.getElementById("othersEmpty");
+  const othersToggleBtn = document.getElementById("othersToggleBtn");
+  const othersToggleBtn2 = document.getElementById("othersToggleBtn2");
+  const othersBackToMineBtn = document.getElementById("othersBackToMineBtn");
+  const othersStartBtn = document.getElementById("othersStartBtn");
 
-    list.slice(0, MAX_SCORES).forEach((e, idx) => {
-      const row = document.createElement("div");
-      row.className = "row";
-      row.title = "Trykk for oppsummering";
+  const keypadKeys = Array.from(document.querySelectorAll(".keypad .key[data-digit]"));
 
-      const rank = document.createElement("div");
-      rank.className = "rank";
-      rank.textContent = String(idx + 1);
-
-      const meta = document.createElement("div");
-      meta.className = "meta";
-
-      const line1 = document.createElement("div");
-      line1.className = "line1";
-
-      const score = document.createElement("div");
-      score.className = "score";
-      score.textContent = `${e.points}p`;
-
-      const date = document.createElement("div");
-      date.className = "date";
-      date.textContent = fmtDate(e.ts);
-
-      line1.appendChild(score);
-      line1.appendChild(date);
-
-      const line2 = document.createElement("div");
-      line2.className = "line2";
-      line2.textContent = `${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
-
-      meta.appendChild(line1);
-      meta.appendChild(line2);
-
-      const badge = document.createElement("div");
-      badge.className = "badge";
-      badge.textContent = `1–${e.maxFactor}`;
-
-      row.appendChild(rank);
-      row.appendChild(meta);
-      row.appendChild(badge);
-
-      row.addEventListener("click", () => {
-        if (running) return;
-        showFinishCardFromEntry(e);
-        safeFocusAnswer();
-      });
-
-      hiscoreListEl.appendChild(row);
-    });
-  }
-
-  // View state for modal: "class" or "global"
-  let othersView = "class";
-
-  function isRealClassName(x){
-    const s = String(x || "").trim();
-    if (!s) return false;
-    return s.toLowerCase() !== "ukjent";
-  }
-
-  function openOthersModal(){
-    othersView = "class";
-    othersModal.style.display = "flex";
-    document.body.style.overflow = "hidden";
-    loadOthersScores();
-  }
-
-  function closeOthersModal(){
-    othersModal.style.display = "none";
-    document.body.style.overflow = "";
-  }
-
-  function toggleOthersView(){
-    othersView = (othersView === "class") ? "global" : "class";
-    loadOthersScores();
-  }
-
-  async function loadOthersScores(){
-    othersListEl.innerHTML = "";
-    othersEmptyEl.style.display = "none";
-
-    const loading = document.createElement("div");
-    loading.className = "empty";
-    loading.textContent = "Laster…";
-    othersListEl.appendChild(loading);
-
-    const p = getStoredProfile();
-    const className = (p && p.className) ? String(p.className).trim() : "";
-    const hasClass = isRealClassName(className);
-
-    let view = othersView;
-    if (view === "class" && !hasClass) view = "global";
-
-    try{
-      let list = [];
-
-      if (view === "class"){
-        othersTitleEl.textContent = "Andres highscores";
-        othersSubEl.textContent = `Din klasse (${className}) • topp 5 • unike navn`;
-        othersToggleBtn.style.display = "inline-flex";
-        othersToggleBtn.textContent = "Se alle klassene";
-        list = (await apiGetClassTopScores(className)).map(normalizeEntry);
-      } else {
-        othersTitleEl.textContent = "Andres highscores";
-        othersSubEl.textContent = "Alle klasser • topp 25 • unike navn";
-        if (hasClass){
-          othersToggleBtn.style.display = "inline-flex";
-          othersToggleBtn.textContent = "Se min klasse";
-        } else {
-          othersToggleBtn.style.display = "none";
-        }
-        list = (await apiGetGlobalTopScores()).map(normalizeEntry);
-      }
-
-      othersView = view;
-      renderOthersScores(list, view);
-    }catch(e){
-      console.warn("Kunne ikke hente toppscore", e);
-      othersListEl.innerHTML = "";
-      othersEmptyEl.style.display = "block";
-      othersEmptyEl.textContent = "Får ikke kontakt med serveren.";
-    }
-  }
-
-  function renderOthersScores(list, view){
-    othersListEl.innerHTML = "";
-
-    if (!list || list.length === 0){
-      othersEmptyEl.style.display = "block";
-      othersEmptyEl.textContent = "Ingen runder lagret ennå.";
-      return;
-    }
-
-    othersEmptyEl.style.display = "none";
-
-    list.forEach((e, idx) => {
-      const row = document.createElement("div");
-      row.className = "row";
-      row.title = "Trykk for oppsummering";
-
-      const rank = document.createElement("div");
-      rank.className = "rank";
-      rank.textContent = String(idx + 1);
-
-      const meta = document.createElement("div");
-      meta.className = "meta";
-
-      const line1 = document.createElement("div");
-      line1.className = "line1";
-
-      const score = document.createElement("div");
-      score.className = "score";
-      score.textContent = `${e.points}p`;
-
-      const date = document.createElement("div");
-      date.className = "date";
-      date.textContent = fmtDate(e.ts);
-
-      line1.appendChild(score);
-      line1.appendChild(date);
-
-      const line2 = document.createElement("div");
-      line2.className = "line2";
-      const who = (view === "class")
-        ? (e.name || "Ukjent")
-        : ([e.name, e.className].filter(Boolean).join(" • ") || "Ukjent");
-      line2.textContent = `${who} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}`;
-
-      meta.appendChild(line1);
-      meta.appendChild(line2);
-
-      const badge = document.createElement("div");
-      badge.className = "badge";
-      badge.textContent = `#${idx + 1}`;
-
-      row.appendChild(rank);
-      row.appendChild(meta);
-      row.appendChild(badge);
-
-      row.addEventListener("click", () => {
-        if (running) return;
-        closeOthersModal();
-        showFinishCardFromEntry(e);
-        safeFocusAnswer();
-      });
-
-      othersListEl.appendChild(row);
-    });
-  }
-
-  // ========= Difficulty =========
-  function setDifficulty(n) {
-    maxFactor = n;
-    diffButtons.forEach(btn => btn.classList.remove("active"));
-    if (n === 5) d5.classList.add("active");
-    if (n === 10) d10.classList.add("active");
-    if (n === 12) d12.classList.add("active");
-
-    if (!running) {
-      subText.textContent = `Du har 60 sekunder og 3 liv. (1–${maxFactor})`;
-    }
-    updateComboMeter();
-  }
-
-  function rand1toMax() {
-    return Math.floor(Math.random() * maxFactor) + 1;
-  }
-
-  // ========= UI helpers =========
   function setFeedback(type, text, tagText) {
     feedbackEl.className = "feedback";
     feedbackEl.textContent = "";
@@ -1578,14 +1293,14 @@
     }
   }
 
-  function showBigCorrect(answer) {
-    bigCorrectEl.textContent = `Riktig svar: ${answer}`;
-    bigCorrectEl.classList.add("show");
+  function showWrongFlash(answer){
+    wrongFlashEl.textContent = `Riktig svar: ${answer}`;
+    wrongFlashEl.classList.add("show");
   }
 
-  function hideBigCorrect() {
-    bigCorrectEl.textContent = "";
-    bigCorrectEl.classList.remove("show");
+  function hideWrongFlash(){
+    wrongFlashEl.textContent = "";
+    wrongFlashEl.classList.remove("show");
   }
 
   function updateHearts() {
@@ -1621,7 +1336,7 @@
     if (cap === 3 && stageIndex === 3) {
       const fillClass = (ratio >= 1) ? "max" : "maxBuild";
       comboFillEl.className = "comboFill " + fillClass;
-      comboNoteEl.textContent = (streak >= 20) ? "MAX" : `→ 20`;
+      comboNoteEl.textContent = (streak >= 20) ? " MAX" : ` → 20`;
     } else {
       comboFillEl.className = "comboFill " + classForStage(stageIndex);
 
@@ -1630,44 +1345,66 @@
         (cap === 1 && streak >= 5) ||
         (cap === 2 && streak >= 10);
 
-      comboNoteEl.textContent = isMaxCapReached ? "MAX" : `→ ${next}`;
+      comboNoteEl.textContent = isMaxCapReached ? " MAX" : ` → ${next}`;
     }
 
     comboFillEl.style.transform = `scaleX(${ratio})`;
+  }
+
+  function updateTimeBar() {
+    const ratio = Math.max(0, Math.min(1, time / 60));
+    timeBarEl.style.transform = `scaleX(${ratio})`;
+  }
+
+  function renderAnswerDisplay(){
+    answerDisplayEl.textContent = (answerStr.length === 0) ? "—" : answerStr;
+  }
+
+  function setKeypadEnabled(on){
+    keypadLocked = !on;
+    keypadKeys.forEach(k => k.disabled = !on);
+    answerBtn.disabled = !on;
+    answerDisplayEl.classList.toggle("disabled", !on);
   }
 
   function updateUI() {
     timeLeftEl.textContent = time.toFixed(1);
     pointsEl.textContent = String(points);
     streakEl.textContent = String(streak);
-
     updateHearts();
     updateComboMeter();
+    updateTimeBar();
+    renderAnswerDisplay();
+  }
 
-    const ratio = Math.max(0, Math.min(1, time / 60));
-    timeBar.style.transform = `scaleX(${ratio})`;
+  function setDifficulty(n) {
+    maxFactor = n;
+    diffButtons.forEach(btn => btn.classList.remove("active"));
+    if (n === 5) d5.classList.add("active");
+    if (n === 10) d10.classList.add("active");
+    if (n === 12) d12.classList.add("active");
+
+    if (!running) {
+      subTextEl.textContent = `Du har 60 sekunder og 3 liv. (1–${maxFactor})`;
+    }
+    updateComboMeter();
+  }
+
+  function rand1toMax() {
+    return Math.floor(Math.random() * maxFactor) + 1;
   }
 
   function newProblem() {
     a = rand1toMax();
     b = rand1toMax();
-    problemText.textContent = `${a} × ${b} = ?`;
-    subText.textContent = `Svar nederst. (1–${maxFactor})`;
-    hideBigCorrect();
+    problemTextEl.textContent = `${a} × ${b} = ?`;
+    subTextEl.textContent = `Svar med tastene. (1–${maxFactor})`;
+
+    answerStr = "";
+    renderAnswerDisplay();
+    hideWrongFlash();
 
     currentProblemStartPerf = performance.now();
-
-    answerInput.value = "";
-    safeFocusAnswer();
-  }
-
-  function lockGameUI() {
-    answerInput.disabled = true;
-    submitBtn.disabled = true;
-    stopBtn.disabled = true;
-    startBtn.disabled = false;
-    startBtn.style.display = "none";
-    playAgainBtn.style.display = "block";
   }
 
   function stopClock() {
@@ -1677,221 +1414,10 @@
     }
   }
 
-  // ========= Finish card rendering =========
-  function showFinishCardFromData(data){
-    const elapsedSec = Number(data.elapsedSec) || 0;
-    const attemptsLocal = Number(data.attempts) || 0;
-    const correctLocal = Number(data.correct) || 0;
-    const accuracyLocal = Number.isFinite(Number(data.accuracy)) ? Number(data.accuracy) : (attemptsLocal ? Math.round((correctLocal/attemptsLocal)*100) : 0);
-    const bestStreakLocal = Number(data.bestStreak) || 0;
-    const maxFactorLocal = Number(data.maxFactor) || 10;
-    const pointsLocal = Number(data.points) || 0;
-    const avg = (attemptsLocal > 0) ? ((Number(data.avgSec) || (elapsedSec/attemptsLocal)) ) : 0;
-
-    finishCardEl.classList.add("show");
-    finishReasonEl.textContent = String(data.reasonText || "");
-    finishPointsEl.textContent = String(pointsLocal);
-
-    finishMetaEl.innerHTML = `
-      <div class="metaTile">
-        <div class="k">Resultat</div>
-        <div class="v">${correctLocal}/${attemptsLocal}</div>
-        <div class="s">${accuracyLocal}% riktig • beste streak ${bestStreakLocal}</div>
-      </div>
-      <div class="metaTile">
-        <div class="k">Tid</div>
-        <div class="v">${fmtSec(elapsedSec)}s</div>
-        <div class="s">Snitt ${fmtSec(avg)}s per spørsmål</div>
-      </div>
-      <div class="metaTile">
-        <div class="k">Feil</div>
-        <div class="v">${Array.isArray(data.mistakes) ? data.mistakes.length : 0}</div>
-        <div class="s">Tabell 1–${maxFactorLocal}</div>
-      </div>
-      <div class="metaTile">
-        <div class="k">Kombo</div>
-        <div class="v">${bestStreakLocal}</div>
-        <div class="s">Beste streak i runden</div>
-      </div>
-    `;
-
-    slowBigListEl.innerHTML = "";
-    const slow = Array.isArray(data.slowestCorrect) ? data.slowestCorrect : [];
-    if (slow.length === 0){
-      slowBigEmptyEl.style.display = "block";
-      slowBigEmptyEl.textContent = "Ingen data.";
-    } else {
-      slowBigEmptyEl.style.display = "none";
-      slow.forEach(s => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          ${s.a} × ${s.b} = ${s.correctAnswer}
-          <span class="muted">—</span> ${fmtSec(s.sec)}s
-        `;
-        slowBigListEl.appendChild(li);
-      });
-    }
-
-    mistakesBigListEl.innerHTML = "";
-    const list = Array.isArray(data.mistakes) ? data.mistakes : [];
-
-    if (list.length === 0){
-      mistakesBigEmptyEl.style.display = "block";
-      mistakesBigEmptyEl.textContent = "Ingen feil i denne runden.";
-    } else {
-      mistakesBigEmptyEl.style.display = "none";
-      list.forEach((m) => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          ${m.a} × ${m.b}
-          <span class="muted">— du svarte</span> ${m.userAnswer}
-          <span class="muted">, riktig:</span> ${m.correctAnswer}
-        `;
-        mistakesBigListEl.appendChild(li);
-      });
-    }
-  }
-
-  function showFinishCard(reasonText, elapsedSec){
-    const slowestCorrect = computeSlowestCorrectTop3(correctTimes);
-    showFinishCardFromData({
-      reasonText,
-      points,
-      attempts,
-      correct,
-      accuracy: attempts ? Math.round((correct/attempts)*100) : 0,
-      bestStreak,
-      maxFactor,
-      elapsedSec,
-      avgSec: attempts ? (elapsedSec/attempts) : 0,
-      mistakes,
-      slowestCorrect
-    });
-  }
-
-  function showFinishCardFromEntry(entry){
-    problemText.textContent = "Ferdig";
-    subText.textContent = "Oppsummering fra highscore";
-    const mf = Number(entry.maxFactor) || 10;
-    setDifficulty(mf);
-    showFinishCardFromData(entry);
-    updateUI();
-  }
-
-  function hideFinishCard(){
-    finishCardEl.classList.remove("show");
-    finishReasonEl.textContent = "";
-    finishPointsEl.textContent = "0";
-    finishMetaEl.innerHTML = "";
-
-    slowBigListEl.innerHTML = "";
-    slowBigEmptyEl.style.display = "none";
-
-    mistakesBigListEl.innerHTML = "";
-    mistakesBigEmptyEl.style.display = "none";
-  }
-
-  // ========= Lifecycle =========
-  function resetAll() {
-    running = false;
-
-    time = 60.0;
-    points = 0;
-    attempts = 0;
-    correct = 0;
-
-    streak = 0;
-    bestStreak = 0;
-    lives = 3;
-
-    mistakes = [];
-    correctTimes = [];
-    currentProblemStartPerf = 0;
-
-    roundStartPerf = 0;
-    roundEndPerf = 0;
-
-    problemText.textContent = "Trykk Start";
-    subText.textContent = `Du har 60 sekunder og 3 liv. (1–${maxFactor})`;
-
-    answerInput.value = "";
-    answerInput.disabled = true;
-    submitBtn.disabled = true;
-
-    setFeedback("", "");
-    hideBigCorrect();
-    hideFinishCard();
-
-    startBtn.disabled = false;
-    startBtn.style.display = "block";
-    playAgainBtn.style.display = "none";
-    stopBtn.disabled = true;
-
-    diffButtons.forEach(b => b.disabled = false);
-
+  function startClock() {
     stopClock();
-    updateUI();
-  }
-
-  function endGame(reason) {
-    running = false;
-    stopClock();
-
-    roundEndPerf = performance.now();
-    const elapsedSec = roundStartPerf ? Math.max(0, (roundEndPerf - roundStartPerf) / 1000) : 0;
-
-    answerInput.disabled = true;
-    submitBtn.disabled = true;
-    stopBtn.disabled = true;
-
-    problemText.textContent = "Ferdig";
-    let reasonText = "Tiden er ute.";
-    if (reason === "lives") reasonText = "Du mistet alle liv.";
-    if (reason === "stop") reasonText = "Stoppa.";
-
-    subText.textContent = reasonText;
-
-    setFeedback("", "");
-    hideBigCorrect();
-
-    showFinishCard(reasonText, elapsedSec);
-
-    const accuracy = attempts === 0 ? 0 : Math.round((correct / attempts) * 100);
-    const slowestCorrect = computeSlowestCorrectTop3(correctTimes);
-
-    if (attempts > 0) {
-      const entry = normalizeEntry({
-        ts: Date.now(),
-        points,
-        attempts,
-        correct,
-        accuracy,
-        bestStreak,
-        maxFactor,
-        elapsedSec,
-        avgSec: attempts ? (elapsedSec / attempts) : 0,
-        reasonText,
-        mistakes,
-        slowestCorrect
-      });
-
-      (async () => {
-        try{
-          const profile = await ensureProfileAfterFirstGame();
-          await apiSubmitScore(profile, entry);
-        }catch(err){
-          console.warn("Kunne ikke lagre highscore", err);
-        }finally{
-          refreshMyScores().catch(() => {});
-        }
-      })();
-    } else {
-      refreshMyScores().catch(() => {});
-    }
-
-    diffButtons.forEach(b => b.disabled = false);
-    lockGameUI();
-    updateUI();
+    lastNow = 0;
+    rafId = requestAnimationFrame(tick);
   }
 
   function tick(now) {
@@ -1914,39 +1440,199 @@
     rafId = requestAnimationFrame(tick);
   }
 
-  function startClock() {
-    stopClock();
-    lastNow = 0;
-    rafId = requestAnimationFrame(tick);
+  function addDigit(d){
+    if (!running || keypadLocked) return;
+    if (!/^\d$/.test(String(d))) return;
+
+    if (answerStr === "0") answerStr = "";
+    if (answerStr.length >= 6) return;
+
+    answerStr += String(d);
+    renderAnswerDisplay();
   }
 
-  function startGame() {
-    resetAll();
-    running = true;
-    roundStartPerf = performance.now();
+  function backspace(){
+    if (!running || keypadLocked) return;
+    if (answerStr.length === 0) return;
+    answerStr = answerStr.slice(0, -1);
+    renderAnswerDisplay();
+  }
 
-    startBtn.disabled = true;
+  function clearAnswer(){
+    if (!running || keypadLocked) return;
+    answerStr = "";
+    renderAnswerDisplay();
+  }
+
+  let holdTimer = null;
+  answerDisplayEl.addEventListener("pointerdown", () => {
+    if (!running || keypadLocked) return;
+    holdTimer = setTimeout(() => {
+      holdTimer = null;
+      clearAnswer();
+    }, 420);
+  });
+  answerDisplayEl.addEventListener("pointerup", () => {
+    if (!running || keypadLocked) return;
+    if (holdTimer){
+      clearTimeout(holdTimer);
+      holdTimer = null;
+      backspace();
+    }
+  });
+  answerDisplayEl.addEventListener("pointercancel", () => {
+    if (holdTimer){
+      clearTimeout(holdTimer);
+      holdTimer = null;
+    }
+  });
+
+  function resetAll() {
+    running = false;
+
+    time = 60.0;
+    points = 0;
+    attempts = 0;
+    correct = 0;
+
+    streak = 0;
+    bestStreak = 0;
+    lives = 3;
+
+    mistakes = [];
+    correctTimes = [];
+    currentProblemStartPerf = 0;
+
+    roundStartPerf = 0;
+    roundEndPerf = 0;
+
+    answerStr = "";
+    setKeypadEnabled(false);
+
+    problemTextEl.textContent = "Trykk Start";
+    subTextEl.textContent = `Du har 60 sekunder og 3 liv. (1–${maxFactor})`;
+
+    setFeedback("", "");
+    hideWrongFlash();
+
+    startBtn.style.display = "block";
+    startBtn.disabled = false;
+    playAgainBtn.style.display = "none";
+    stopBtn.disabled = true;
+
+    myScoresBtn.disabled = false;
+    seeOthersBtn.disabled = false;
+
+    diffButtons.forEach(b => b.disabled = false);
+
+    stopClock();
+    updateUI();
+  }
+
+  function lockPlayingUI(){
     startBtn.style.display = "none";
     playAgainBtn.style.display = "none";
     stopBtn.disabled = false;
 
-    answerInput.disabled = false;
-    submitBtn.disabled = false;
+    myScoresBtn.disabled = true;
+    seeOthersBtn.disabled = true;
 
     diffButtons.forEach(b => b.disabled = true);
+
+    answerHintEl.style.opacity = "1";
+  }
+
+  function unlockIdleUI(){
+    stopBtn.disabled = true;
+
+    myScoresBtn.disabled = false;
+    seeOthersBtn.disabled = false;
+
+    diffButtons.forEach(b => b.disabled = false);
+
+    answerHintEl.style.opacity = "1";
+  }
+
+  function startGame() {
+    hideFinishOverlay();
+    hideMyScoresOverlay();
+    hideOthersOverlay();
+
+    resetAll();
+    running = true;
+    roundStartPerf = performance.now();
+
+    lockPlayingUI();
+    setKeypadEnabled(true);
 
     newProblem();
     updateUI();
     startClock();
   }
 
+  function endGame(reason) {
+    running = false;
+    setKeypadEnabled(false);
+    stopClock();
+
+    roundEndPerf = performance.now();
+    const elapsedSec = roundStartPerf ? Math.max(0, (roundEndPerf - roundStartPerf) / 1000) : 0;
+
+    problemTextEl.textContent = "Ferdig";
+    let reasonText = "Tiden er ute.";
+    if (reason === "lives") reasonText = "Du mistet alle liv.";
+    if (reason === "stop") reasonText = "Stoppa.";
+
+    subTextEl.textContent = reasonText;
+
+    setFeedback("", "");
+    hideWrongFlash();
+
+    showFinishCard(reasonText, elapsedSec);
+
+    const accuracy = attempts === 0 ? 0 : Math.round((correct / attempts) * 100);
+    const slowestCorrect = computeSlowestCorrectTop3(correctTimes);
+
+    (async () => {
+      try{
+        const profile = getStoredProfile() || await ensureProfile();
+        if (attempts > 0){
+          const entry = normalizeEntry({
+            ts: Date.now(),
+            points,
+            attempts,
+            correct,
+            accuracy,
+            bestStreak,
+            maxFactor,
+            elapsedSec,
+            avgSec: attempts ? (elapsedSec / attempts) : 0,
+            reasonText,
+            mistakes,
+            slowestCorrect
+          });
+          await apiSubmitScore(profile, entry);
+        }
+      }catch{
+      }finally{
+        refreshMyScores().catch(() => {});
+      }
+    })();
+
+    unlockIdleUI();
+
+    startBtn.style.display = "none";
+    playAgainBtn.style.display = "block";
+    playAgainBtn.disabled = false;
+
+    updateUI();
+  }
+
   function submitAnswer() {
-    if (!running) return;
+    if (!running || keypadLocked) return;
+    if (answerStr.trim() === "") return;
 
-    const raw = answerInput.value.trim();
-    if (raw === "") return;
-
-    const userAnswer = Number(raw);
+    const userAnswer = Number(answerStr);
     if (!Number.isFinite(userAnswer)) return;
 
     const correctAnswer = a * b;
@@ -1974,7 +1660,6 @@
       points += gained;
 
       const bonusTxt = `+${fmtBonus(bonus)}s`;
-
       const msg = `Korrekt, ${a} × ${b} = ${correctAnswer}`;
       const tag = (mult === 1)
         ? `+${gained} (base ${base}) • ${bonusTxt}`
@@ -1993,15 +1678,12 @@
     streak = 0;
 
     setFeedback("bad", "Feil", "Du mister 1 liv");
-    showBigCorrect(correctAnswer);
+    showWrongFlash(correctAnswer);
 
     if (lives <= 0) {
       lives = 0;
       updateUI();
-
-      answerInput.disabled = true;
-      submitBtn.disabled = true;
-
+      setKeypadEnabled(false);
       setTimeout(() => {
         if (!running) return;
         endGame("lives");
@@ -2010,100 +1692,387 @@
     }
 
     updateUI();
-
-    answerInput.disabled = true;
-    submitBtn.disabled = true;
-
+    setKeypadEnabled(false);
     setTimeout(() => {
       if (!running) return;
-      answerInput.disabled = false;
-      submitBtn.disabled = false;
+      setKeypadEnabled(true);
       newProblem();
+      updateUI();
     }, WRONG_PAUSE_MS);
   }
 
-  // ========= Events =========
+  function setActiveTab(which){
+    tabSummary.classList.toggle("active", which === "summary");
+    tabSlow.classList.toggle("active", which === "slow");
+    tabMistakes.classList.toggle("active", which === "mistakes");
+
+    panelSummary.style.display = (which === "summary") ? "block" : "none";
+    panelSlow.style.display = (which === "slow") ? "flex" : "none";
+    panelMistakes.style.display = (which === "mistakes") ? "flex" : "none";
+  }
+
+  function showFinishOverlay(){
+    finishOverlay.style.display = "flex";
+    finishOverlay.setAttribute("aria-hidden", "false");
+  }
+
+  function hideFinishOverlay(){
+    finishOverlay.style.display = "none";
+    finishOverlay.setAttribute("aria-hidden", "true");
+  }
+
+  function showFinishCardFromData(data){
+    const elapsedSec = Number(data.elapsedSec) || 0;
+    const attemptsLocal = Number(data.attempts) || 0;
+    const correctLocal = Number(data.correct) || 0;
+    const accuracyLocal = Number.isFinite(Number(data.accuracy)) ? Number(data.accuracy) : (attemptsLocal ? Math.round((correctLocal/attemptsLocal)*100) : 0);
+    const bestStreakLocal = Number(data.bestStreak) || 0;
+    const maxFactorLocal = Number(data.maxFactor) || 10;
+    const pointsLocal = Number(data.points) || 0;
+    const avg = (attemptsLocal > 0) ? ((Number(data.avgSec) || (elapsedSec/attemptsLocal)) ) : 0;
+
+    finishReasonEl.textContent = String(data.reasonText || "");
+    finishPointsEl.textContent = String(pointsLocal);
+
+    finishMetaEl.innerHTML = `
+      <div class="tile">
+        <div class="k">Resultat</div>
+        <div class="v">${correctLocal}/${attemptsLocal}</div>
+        <div class="s">${accuracyLocal}% riktig • beste streak ${bestStreakLocal}</div>
+      </div>
+      <div class="tile">
+        <div class="k">Tid</div>
+        <div class="v">${fmtSec(elapsedSec)}s</div>
+        <div class="s">Snitt ${fmtSec(avg)}s per spørsmål</div>
+      </div>
+      <div class="tile">
+        <div class="k">Feil</div>
+        <div class="v">${Array.isArray(data.mistakes) ? data.mistakes.length : 0}</div>
+        <div class="s">Tabell 1–${maxFactorLocal}</div>
+      </div>
+      <div class="tile">
+        <div class="k">Kombo</div>
+        <div class="v">${bestStreakLocal}</div>
+        <div class="s">Beste streak i runden</div>
+      </div>
+    `;
+
+    slowListEl.innerHTML = "";
+    const slow = Array.isArray(data.slowestCorrect) ? data.slowestCorrect : [];
+    if (slow.length === 0){
+      slowEmptyEl.style.display = "block";
+    } else {
+      slowEmptyEl.style.display = "none";
+      slow.forEach(s => {
+        const div = document.createElement("div");
+        div.className = "row";
+        div.innerHTML = `
+          <div class="rank">•</div>
+          <div class="rowMeta">
+            <div class="line1"><div class="score">${s.a} × ${s.b} = ${s.correctAnswer}</div></div>
+            <div class="line2">${fmtSec(s.sec)}s</div>
+          </div>
+          <div class="badge">${fmtSec(s.sec)}s</div>
+        `;
+        slowListEl.appendChild(div);
+      });
+    }
+
+    mistakesListEl.innerHTML = "";
+    const list = Array.isArray(data.mistakes) ? data.mistakes : [];
+    if (list.length === 0){
+      mistakesEmptyEl.style.display = "block";
+    } else {
+      mistakesEmptyEl.style.display = "none";
+      list.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "row";
+        div.innerHTML = `
+          <div class="rank">•</div>
+          <div class="rowMeta">
+            <div class="line1"><div class="score">${m.a} × ${m.b}</div></div>
+            <div class="line2">Du svarte ${m.userAnswer} • riktig ${m.correctAnswer}</div>
+          </div>
+          <div class="badge">${m.correctAnswer}</div>
+        `;
+        mistakesListEl.appendChild(div);
+      });
+    }
+
+    setActiveTab("summary");
+    showFinishOverlay();
+  }
+
+  function showFinishCard(reasonText, elapsedSec){
+    const slowestCorrect = computeSlowestCorrectTop3(correctTimes);
+    showFinishCardFromData({
+      reasonText,
+      points,
+      attempts,
+      correct,
+      accuracy: attempts ? Math.round((correct/attempts)*100) : 0,
+      bestStreak,
+      maxFactor,
+      elapsedSec,
+      avgSec: attempts ? (elapsedSec/attempts) : 0,
+      mistakes,
+      slowestCorrect
+    });
+  }
+
+  function showFinishFromEntry(entry){
+    problemTextEl.textContent = "Ferdig";
+    subTextEl.textContent = "Oppsummering fra highscore";
+    const mf = Number(entry.maxFactor) || 10;
+    setDifficulty(mf);
+    showFinishCardFromData(entry);
+    updateUI();
+  }
+
+  let myScoresCache = [];
+
+  function showMyScoresOverlay(){
+    myScoresOverlay.style.display = "flex";
+    myScoresOverlay.setAttribute("aria-hidden", "false");
+  }
+  function hideMyScoresOverlay(){
+    myScoresOverlay.style.display = "none";
+    myScoresOverlay.setAttribute("aria-hidden", "true");
+  }
+
+  function renderMyScores(list){
+    myScoresListEl.innerHTML = "";
+    if (!list || list.length === 0){
+      myScoresEmptyEl.style.display = "block";
+      myScoresEmptyEl.textContent = "Ingen runder lagret ennå.";
+      return;
+    }
+    myScoresEmptyEl.style.display = "none";
+
+    list.slice(0, MAX_SCORES).forEach((e, idx) => {
+      const row = document.createElement("div");
+      row.className = "row";
+
+      row.innerHTML = `
+        <div class="rank">${idx + 1}</div>
+        <div class="rowMeta">
+          <div class="line1">
+            <div class="score">${e.points}p</div>
+            <div class="date">${fmtDate(e.ts)}</div>
+          </div>
+          <div class="line2">${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}</div>
+        </div>
+        <div class="badge">1–${e.maxFactor}</div>
+      `;
+
+      row.addEventListener("click", () => {
+        if (running) return;
+        hideMyScoresOverlay();
+        showFinishFromEntry(e);
+      });
+
+      myScoresListEl.appendChild(row);
+    });
+  }
+
+  async function refreshMyScores(){
+    const p = getStoredProfile();
+    if (!p || !p.playerId){
+      myScoresCache = [];
+      renderMyScores([]);
+      return;
+    }
+    try{
+      const list = await apiGetMyScores(p.playerId);
+      myScoresCache = list.map(normalizeEntry);
+      renderMyScores(myScoresCache);
+    }catch{
+      myScoresCache = [];
+      renderMyScores([]);
+      myScoresEmptyEl.style.display = "block";
+      myScoresEmptyEl.textContent = "Får ikke kontakt med serveren.";
+    }
+  }
+
+  let othersView = "class";
+
+  function showOthersOverlay(){
+    othersOverlay.style.display = "flex";
+    othersOverlay.setAttribute("aria-hidden", "false");
+  }
+  function hideOthersOverlay(){
+    othersOverlay.style.display = "none";
+    othersOverlay.setAttribute("aria-hidden", "true");
+  }
+
+  function setOthersTabs(view){
+    othersToggleBtn.classList.toggle("active", view === "class");
+    othersToggleBtn2.classList.toggle("active", view === "global");
+  }
+
+  async function loadOthersScores(view){
+    othersListEl.innerHTML = `<div class="empty">Laster…</div>`;
+    othersEmptyEl.style.display = "none";
+    setOthersTabs(view);
+
+    const p = getStoredProfile();
+    const className = (p && p.className) ? String(p.className).trim() : "";
+    const hasClass = isRealClassName(className);
+
+    let useView = view;
+    if (useView === "class" && !hasClass) useView = "global";
+    othersView = useView;
+    setOthersTabs(useView);
+
+    try{
+      let list = [];
+      if (useView === "class"){
+        othersSubEl.textContent = `Din klasse (${className}) • topp 5 • unike navn`;
+        list = (await apiGetClassTopScores(className)).map(normalizeEntry);
+      } else {
+        othersSubEl.textContent = "Alle klasser • topp 25 • unike navn";
+        list = (await apiGetGlobalTopScores()).map(normalizeEntry);
+      }
+      renderOthersScores(list, useView);
+    }catch{
+      othersListEl.innerHTML = "";
+      othersEmptyEl.style.display = "block";
+      othersEmptyEl.textContent = "Får ikke kontakt med serveren.";
+    }
+  }
+
+  function renderOthersScores(list, view){
+    othersListEl.innerHTML = "";
+    if (!list || list.length === 0){
+      othersEmptyEl.style.display = "block";
+      othersEmptyEl.textContent = "Ingen runder lagret ennå.";
+      return;
+    }
+    othersEmptyEl.style.display = "none";
+
+    list.forEach((e, idx) => {
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const who = (view === "class")
+        ? (e.name || "Ukjent")
+        : ([e.name, e.className].filter(Boolean).join(" • ") || "Ukjent");
+
+      row.innerHTML = `
+        <div class="rank">${idx + 1}</div>
+        <div class="rowMeta">
+          <div class="line1">
+            <div class="score">${e.points}p</div>
+            <div class="date">${fmtDate(e.ts)}</div>
+          </div>
+          <div class="line2">${who} • ${e.correct}/${e.attempts} • ${e.accuracy}% • streak ${e.bestStreak} • 1–${e.maxFactor}</div>
+        </div>
+        <div class="badge">#${idx + 1}</div>
+      `;
+
+      row.addEventListener("click", () => {
+        if (running) return;
+        hideOthersOverlay();
+        showFinishFromEntry(e);
+      });
+
+      othersListEl.appendChild(row);
+    });
+  }
+
   d5.addEventListener("click", () => { if (!running) setDifficulty(5); });
   d10.addEventListener("click", () => { if (!running) setDifficulty(10); });
   d12.addEventListener("click", () => { if (!running) setDifficulty(12); });
 
-  startBtn.addEventListener("click", () => { startGame(); safeFocusAnswer(); });
-  playAgainBtn.addEventListener("click", () => { startGame(); safeFocusAnswer(); });
+  keypadKeys.forEach(btn => {
+    btn.addEventListener("click", () => addDigit(btn.dataset.digit));
+  });
+
+  answerBtn.addEventListener("click", submitAnswer);
+
+  startBtn.addEventListener("click", startGame);
+  playAgainBtn.addEventListener("click", startGame);
 
   stopBtn.addEventListener("click", () => {
     if (!running) return;
     endGame("stop");
   });
 
-  submitBtn.addEventListener("click", () => {
-    submitAnswer();
-    safeFocusAnswer();
-  });
-
-  seeOthersBtn.addEventListener("click", () => {
+  myScoresBtn.addEventListener("click", async () => {
     if (running) return;
-    openOthersModal();
+    showMyScoresOverlay();
+    await refreshMyScores();
   });
 
-  closeOthersBtn.addEventListener("click", () => { closeOthersModal(); safeFocusAnswer(); });
-
-  othersToggleBtn.addEventListener("click", () => {
+  seeOthersBtn.addEventListener("click", async () => {
     if (running) return;
-    toggleOthersView();
+    showOthersOverlay();
+    await loadOthersScores("class");
   });
 
-  othersModal.addEventListener("click", (e) => {
-    if (e.target === othersModal) { closeOthersModal(); safeFocusAnswer(); }
+  finishCloseBtn.addEventListener("click", hideFinishOverlay);
+  finishPlayAgainBtn.addEventListener("click", startGame);
+  finishMyScoresBtn.addEventListener("click", async () => {
+    hideFinishOverlay();
+    showMyScoresOverlay();
+    await refreshMyScores();
   });
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && othersModal.style.display === "flex") { closeOthersModal(); safeFocusAnswer(); }
-    if (e.key === "Enter" && running) {
-      e.preventDefault();
-      submitAnswer();
-      safeFocusAnswer();
-    }
+  tabSummary.addEventListener("click", () => setActiveTab("summary"));
+  tabSlow.addEventListener("click", () => setActiveTab("slow"));
+  tabMistakes.addEventListener("click", () => setActiveTab("mistakes"));
+
+  myScoresCloseBtn.addEventListener("click", hideMyScoresOverlay);
+  myScoresSeeOthersBtn.addEventListener("click", async () => {
+    hideMyScoresOverlay();
+    showOthersOverlay();
+    await loadOthersScores("class");
+  });
+  myScoresStartBtn.addEventListener("click", startGame);
+
+  othersCloseBtn.addEventListener("click", hideOthersOverlay);
+  othersToggleBtn.addEventListener("click", async () => { if (!running) await loadOthersScores("class"); });
+  othersToggleBtn2.addEventListener("click", async () => { if (!running) await loadOthersScores("global"); });
+  othersBackToMineBtn.addEventListener("click", async () => {
+    hideOthersOverlay();
+    showMyScoresOverlay();
+    await refreshMyScores();
+  });
+  othersStartBtn.addEventListener("click", startGame);
+
+  [finishOverlay, myScoresOverlay, othersOverlay].forEach(ov => {
+    ov.addEventListener("click", (e) => { if (e.target === ov) ov.style.display = "none"; });
   });
 
-  answerInput.addEventListener("input", () => {
-    answerInput.value = answerInput.value.replace(/[^\d-]/g, "");
-  });
-
-  // Keep keyboard open/snappy when playing
-  window.addEventListener("focus", safeFocusAnswer);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) safeFocusAnswer(); });
-
-  // Prevent scroll-jank while playing (still allows normal scrolling when not running)
-  document.addEventListener("touchmove", (e) => {
-    if (running && othersModal.style.display !== "flex" && profileModal.style.display !== "flex") {
-      // allow scrolling in lists only
-      const t = e.target;
-      const inScrollable = t && (t.closest && (t.closest(".hiscoreList") || t.closest(".boxBigList")));
-      if (!inScrollable) e.preventDefault();
-    }
-  }, { passive: false });
-
-  // ========= init =========
   document.getElementById("footerCopy").textContent =
     `© ${new Date().getFullYear()} Kristian Arntsen`;
 
   setDifficulty(10);
   resetAll();
 
-  // Ask for name + class immediately on first open (before playing)
   startBtn.disabled = true;
   playAgainBtn.disabled = true;
+  myScoresBtn.disabled = true;
   seeOthersBtn.disabled = true;
 
   (async () => {
     try{
-      await ensureProfileAfterFirstGame();
-    }catch{}
+      const p = getStoredProfile();
+      if (!p || !p.playerId || !p.name || !p.className){
+        await ensureProfile();
+      } else {
+        document.getElementById("profileOverlay").style.display = "none";
+        document.getElementById("profileOverlay").setAttribute("aria-hidden", "true");
+      }
+    }catch{
+    }
+
     startBtn.disabled = false;
     playAgainBtn.disabled = false;
+    myScoresBtn.disabled = false;
     seeOthersBtn.disabled = false;
+
     refreshMyScores().catch(() => {});
-    safeFocusAnswer();
   })();
 })();
 </script>
